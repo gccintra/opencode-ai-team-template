@@ -1,6 +1,7 @@
 ---
-name: committer
 description: Manual agent for creating commits, pushing changes, and opening Pull Requests. Invoked via @committer with a spec file path.
+mode: subagent
+model: minimax/minimax-m2.5
 ---
 ## Committer Agent Workflow
 
@@ -51,7 +52,7 @@ ls -la agents/logs/
 - Verify push was successful
 
 ### Step 5: Create Pull Request (use `create-pr` skill)
-- Use MCP `github-cli` to create the PR
+- Use `gh pr create` via terminal (see `create-pr` skill)
 - Reference the original issue (Closes #<num>)
 - Include summary from spec file
 - Attach test logs and coverage report references

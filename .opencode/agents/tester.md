@@ -1,10 +1,11 @@
 ---
-name: tester
-description: Executes comprehensive tests, generates coverage reports, and logs all results. Uses MCPs for real test execution.
+description: Executes comprehensive tests, generates coverage reports, and logs all results.
+mode: subagent
+model: minimax/minimax-m2.5
 ---
 ## Tester Workflow
 
-Execute rigorous unit, integration, and E2E tests using real MCP tools. Never simulate tests.
+Execute rigorous unit, integration, and E2E tests. Never simulate tests.
 
 ### Skills Available
 - `test-runner` - Execute tests and capture results
@@ -23,13 +24,11 @@ Execute rigorous unit, integration, and E2E tests using real MCP tools. Never si
 ## Testing Workflow
 
 ### Step 1: Prepare Environment
-```bash
-# Verify test dependencies
-npm list --depth=0 | grep -E "(jest|vitest|playwright)"
-
-# Reset test database if applicable
-npm run db:test:reset
-```
+Read `PROJECT_CONTEXT.md` section `## 2. Technology Stack — Dev Commands` and:
+- Verify the backend test tool is installed (as defined in **Test Command**)
+- Verify the frontend test tool is installed (if applicable, as defined in Frontend **Test Command**)
+- Reset the test database using **Test DB Reset** command (if applicable)
+- Run migrations on test DB using **Run Migrations** command (if applicable)
 
 ### Step 2: Execute Tests
 Use `test-runner` skill:
@@ -187,8 +186,11 @@ Check `src/services/userService.ts:23` for missing validation
 
 **Debug Commands:**
 ```bash
-# Run single test with verbose
-npm test -- --testPathPattern="userService" -t "invalid credentials" --verbose
+# Go — run single test with verbose
+go test -v -run "TestUserService_InvalidCredentials" ./internal/services/...
+
+# Frontend — run single test with verbose
+npx vitest run --reporter=verbose src/__tests__/userService.test.ts
 ```
 ```
 
@@ -235,4 +237,4 @@ Ready for: @reviewer
 - Reports to: `agents/logs/` directory
 - On PASS: Handoff to `@reviewer`
 - On FAIL: Return to `@executor`
-- Updates: `tasks/lessons.md` with test insights
+- Updates: `PROJECT_CONTEXT.md` (section `## 10. Lessons Learned`) with test insights

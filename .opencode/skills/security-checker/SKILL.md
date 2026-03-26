@@ -13,14 +13,14 @@ Automated security analysis following OWASP guidelines and industry best practic
 - When security-sensitive code is modified
 
 ### Prerequisites
-Use MCP `linter-security` for automated scanning:
-```bash
-npm run lint:security
-# or
-bandit -r src/  # Python
-# or
-gosec ./...     # Go
-```
+Read `PROJECT_CONTEXT.md` → `## 2. Technology Stack — Dev Commands` and run:
+- Backend **Security Scanner** command
+- Frontend dependency audit if applicable
+
+Example commands vary by stack:
+- Go: `gosec ./...` + `govulncheck ./...`
+- Python: `bandit -r src/` + `pip-audit`
+- Node: `npm audit --audit-level=moderate`
 
 ### Security Checklist (OWASP Top 10)
 
@@ -89,20 +89,16 @@ gosec ./...     # Go
 - [ ] No user-controlled redirects
 
 ### Step 1: Automated Scan
-
+Run commands from `PROJECT_CONTEXT.md → Dev Commands`:
 ```bash
-# Run security linter
-npm run lint:security
+# Backend security scanner (as defined in Security Scanner field)
+<backend security scanner command>
 
-# Check for secrets
+# Check for secrets (always)
 git secrets --scan
 
-# Dependency audit
-npm audit
-# or
-pip-audit
-# or
-go list -m -json all | nancy sleuth
+# Frontend dependency audit (if applicable, as defined in Frontend stack)
+<frontend audit command if applicable>
 ```
 
 ### Step 2: Manual Review
@@ -285,4 +281,4 @@ Gate Status: BLOCKED until high finding resolved
 - Triggered by: `executor`, `reviewer`
 - Reports to: `lessons-writer` (for security patterns)
 - Blocks: PR creation if FAIL status
-- Uses: MCP `linter-security`
+- Uses: **Security Scanner** commands from `PROJECT_CONTEXT.md → Dev Commands` via terminal

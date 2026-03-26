@@ -1,112 +1,25 @@
 {
-  "settings": {
-    "autoCompact": true,
-    "autoHandoff": true,
-    "maxTokensPerAgent": 80000,
-    "plugin": ["oh-my-opencode"]
-  },
-  "mcp": {
-    "git-integration": {
-      "type": "remote",
-      "url": "https://api.github.com/repos/<owner>/<repo>",
-      "enabled": true
-    },
-    "testing-tools": {
-      "type": "local",
-      "command": ["npx", "playwright", "test"],
-      "enabled": true
-    },
-    "db-query": {
-      "type": "remote",
-      "url": "http://localhost:8000/mcp/db",
-      "enabled": true
-    },
-    "browser-inspiration": {
-      "type": "remote",
-      "url": "https://firecrawl.dev/mcp",
-      "enabled": true
-    },
-    "linter-security": {
-      "type": "local",
-      "command": ["npm", "run", "lint"],
-      "enabled": true
-    },
-    "github-cli": {
-      "type": "local",
-      "command": ["gh"],
-      "enabled": true,
-      "description": "GitHub CLI for issues, PRs, and repository operations"
-    },
-    "test-coverage": {
-      "type": "local",
-      "command": ["npm", "run", "test:coverage"],
-      "enabled": true,
-      "description": "Generate test coverage reports"
-    },
-    "commit-tools": {
-      "type": "local",
-      "command": ["git"],
-      "enabled": true,
-      "description": "Git operations for commit and push"
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["oh-my-opencode"],
+  "permission": {
+    "skill": {
+      "*": "allow"
     }
   },
-  "agents": {
-    "orchestrator": {
-      "mode": "lead",
-      "model": "google/gemini-3-pro",
-      "prompt": "{file:./agents/skills/orchestrator.md}",
-      "tools": ["mcp/git-integration", "mcp/github-cli"],
-      "skills": ["issue-reader", "todo-manager"],
-      "handoffs": ["planner-frontend", "planner-backend"]
+  "mcp": {
+    "figma": {
+      "enabled": true,
+      "type": "remote",
+      "url": "https://mcp.figma.com/mcp",
+      "oauth": {
+        "clientId": "your_id",
+        "clientSecret": "your_secret"
+      }
     },
-    "planner-frontend": {
-      "mode": "subagent",
-      "model": "google/gemini-3-pro",
-      "prompt": "{file:./agents/skills/planner-front.md}",
-      "tools": ["mcp/browser-inspiration"],
-      "skills": ["frontend-design", "brand-guidelines", "todo-manager"],
-      "handoffs": ["executor"]
-    },
-    "planner-backend": {
-      "mode": "subagent",
-      "model": "google/gemini-3-pro",
-      "prompt": "{file:./agents/skills/planner-back.md}",
-      "tools": ["mcp/db-query"],
-      "skills": ["golang-pro", "db-migrator", "todo-manager"],
-      "handoffs": ["executor"]
-    },
-    "executor": {
-      "mode": "subagent",
-      "model": "anthropic/claude-opus-4.6",
-      "prompt": "{file:./agents/skills/senior-engineer-executor.md}",
-      "tools": ["mcp/db-query", "mcp/linter-security"],
-      "skills": ["test-generator", "todo-manager", "security-checker"],
-      "handoffs": ["tester"]
-    },
-    "tester": {
-      "mode": "subagent",
-      "model": "local/qwen2.5-coder:14b",
-      "prompt": "{file:./agents/skills/tester.md}",
-      "tools": ["mcp/testing-tools", "mcp/test-coverage"],
-      "skills": ["test-runner", "test-logger", "coverage-reporter"],
-      "handoffs": ["executor", "reviewer"]
-    },
-    "reviewer": {
-      "mode": "subagent",
-      "model": "local/qwen2.5-coder:14b",
-      "prompt": "{file:./agents/skills/code-reviewer.md}",
-      "tools": ["mcp/linter-security"],
-      "skills": ["quick-review", "lessons-writer", "security-checker"],
-      "handoffs": []
-    },
-    "committer": {
-      "mode": "manual",
-      "model": "anthropic/claude-opus-4.6",
-      "prompt": "{file:./agents/skills/committer.md}",
-      "tools": ["mcp/github-cli", "mcp/commit-tools"],
-      "skills": ["commit-changes", "push-changes", "create-pr", "pr-description"],
-      "handoffs": [],
-      "description": "Manual agent for commit, push, and PR creation. Invoke via @committer"
+    "firecrawl": {
+      "type": "remote",
+      "url": "https://mcp.firecrawl.dev/your_key/v2/mcp",
+      "enabled": true
     }
   }
 }

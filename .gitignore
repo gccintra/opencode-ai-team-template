@@ -1,0 +1,15 @@
+# Editor/IDE
+.claude/skills/
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules/
+.opencode/node_modules/
+
+# Environment
+.env
+.env.*
+*.pem
+*.key
+

@@ -263,7 +263,7 @@ Use `@committer agents/specs/issue-<num>-spec.md` to create commit and PR.
 ## Important Notes
 
 - **DO NOT** auto-commit or auto-push
-- **DO NOT** use git-integration MCP for commits
+- Commits must be created with git commands directly.
 - **ONLY** mark spec as READY_TO_COMMIT
 - User invokes `@committer` manually for commit/PR
 

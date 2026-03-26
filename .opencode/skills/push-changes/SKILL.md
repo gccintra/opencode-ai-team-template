@@ -194,4 +194,4 @@ Action: This branch requires a PR
 ### Integration
 - Follows: `commit-changes` skill
 - Precedes: `create-pr` skill
-- Uses: MCP `commit-tools`
+- Uses: `git` commands directly

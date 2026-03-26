@@ -11,35 +11,25 @@ Generate, analyze, and report on test coverage metrics for quality assurance.
 - To verify coverage meets project thresholds
 - Before marking an issue as complete
 - For PR documentation
-
+  
 ### Prerequisites
-Use MCP `test-coverage` to generate raw coverage data:
-```bash
-npm run test:coverage
-# or
-pytest --cov=src --cov-report=json
-```
+Read `PROJECT_CONTEXT.md` → `## 2. Technology Stack — Dev Commands` and run:
+- Backend **Coverage Command** to generate coverage data
+- Frontend **Coverage Command** (if applicable)
+
+Example commands vary by stack:
+- Go: `go test -coverprofile=coverage.out ./... && go tool cover -func=coverage.out`
+- Python: `pytest --cov=src --cov-report=json`
+- Node/Vitest: `npx vitest run --coverage`
 
 ### Step 1: Collect Coverage Data
+Use the output from the **Coverage Command** run in Prerequisites.
+Coverage data format varies by tool:
+- Go (`go tool cover`): parses function-level text output
+- Python (pytest-cov): generates `coverage.json` or XML
+- JS/TS (Istanbul/Vitest): generates `coverage/coverage-summary.json`
 
-#### JavaScript/TypeScript (Istanbul/NYC/Vitest)
-Parse `coverage/coverage-summary.json`:
-```json
-{
-  "total": {
-    "statements": { "total": 500, "covered": 425, "pct": 85 },
-    "branches": { "total": 200, "covered": 156, "pct": 78 },
-    "functions": { "total": 100, "covered": 90, "pct": 90 },
-    "lines": { "total": 480, "covered": 408, "pct": 85 }
-  }
-}
-```
-
-#### Python (pytest-cov)
-Parse `coverage.json` or use:
-```bash
-coverage json -o coverage.json
-```
+Parse the tool's output to extract: total statements, branches, functions, lines covered.
 
 ### Step 2: Analyze Coverage
 
@@ -202,7 +192,7 @@ Branch coverage needs improvement but not blocking.
 ```
 
 ### Integration
-- Uses: MCP `test-coverage`
+- Uses: **Coverage Command** from `PROJECT_CONTEXT.md → Dev Commands` via terminal
 - Receives data from: `test-runner`
 - Reports saved to: `agents/logs/`
 - Referenced by: `create-pr`, `tester`

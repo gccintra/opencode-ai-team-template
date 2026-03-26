@@ -12,7 +12,7 @@ Parse GitHub issues into structured intake documents for the development workflo
 - To create standardized intake documents
 
 ### Step 1: Fetch Issue
-Use MCP `github-cli` to fetch the issue:
+Run the gh command directly:
 ```bash
 gh issue view <issue-number> --json title,body,labels,assignees,milestone,comments
 ```
@@ -33,7 +33,7 @@ Extract and categorize:
 - Design references / mockups (links)
 - Related issues or dependencies
 
-### Step 3: Classify Issue Type
+### Step 3: Classify Issue Typez
 Based on labels and content:
 - `feature` - New functionality
 - `bug` - Fix existing behavior

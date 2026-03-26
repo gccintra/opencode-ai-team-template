@@ -1,6 +1,6 @@
 ---
 name: lessons-writer
-description: Documents lessons learned, patterns discovered, and mistakes to avoid in tasks/lessons.md.
+description: Documents lessons learned, patterns discovered, and mistakes to avoid in PROJECT_CONTEXT.md (section 10).
 ---
 ## Lessons Writer Skill
 
@@ -15,7 +15,7 @@ Capture and organize lessons learned throughout the development process to preve
 - At the end of each issue/feature completion
 
 ### File Location
-`agents/tasks/lessons.md`
+`PROJECT_CONTEXT.md` (section `## 10. Lessons Learned`)
 
 ### Document Structure
 ```markdown
@@ -153,7 +153,7 @@ When something works particularly well:
 
 ### Review Protocol
 At session start, agents should:
-1. Read `agents/tasks/lessons.md`
+1. Read `PROJECT_CONTEXT.md (section ## 10. Lessons Learned)`
 2. Note any lessons relevant to current work
 3. Apply documented patterns proactively
 
@@ -164,7 +164,7 @@ After adding a lesson:
 
 **Category:** <category>
 **Title:** <lesson title>
-**Added to:** agents/tasks/lessons.md
+**Added to:** PROJECT_CONTEXT.md (section ## 10. Lessons Learned)
 
 Summary: <one-line summary of what was learned>
 ```

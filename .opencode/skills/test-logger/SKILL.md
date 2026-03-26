@@ -111,10 +111,10 @@ at processTicksAndRejections (node:internal/process/task_queues:95:5)
 
 ## Environment
 
-- **Node Version:** v20.10.0
-- **NPM Version:** 10.2.0
-- **OS:** Linux (CI) / macOS (local)
-- **Test Framework:** Vitest 1.2.0
+- **Runtime:** [version of backend language/runtime, e.g., Go 1.21, Python 3.12, Node 20]
+- **Package Manager:** [npm/pip/go mod + version]
+- **OS:** [detected at runtime]
+- **Test Framework:** [from PROJECT_CONTEXT.md, e.g., Vitest, pytest, go test]
 
 ---
 

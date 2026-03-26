@@ -262,5 +262,5 @@ Action: Rebase on latest main
 ### Integration
 - Follows: `push-changes` skill
 - Uses: `pr-description` skill for formatting
-- Uses: MCP `github-cli`
+- Uses: `gh` CLI (GitHub CLI — must be authenticated via `gh auth login`)
 - References: Test logs, coverage reports, security scans

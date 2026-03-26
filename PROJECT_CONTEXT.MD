@@ -45,6 +45,31 @@
 * **Search:** [Ex: Elasticsearch, Meilisearch]
 * **Migrations:** [Ex: Alembic, Knex, Migrate]
 
+### Dev Commands
+*(Fill these in so agents know exactly which commands to run)*
+
+**Backend:**
+* **Test Command:** [Ex: `go test ./...`, `pytest`, `npm test`]
+* **Coverage Command:** [Ex: `go test -coverprofile=coverage.out ./...`, `pytest --cov`, `npx vitest run --coverage`]
+* **Lint Command:** [Ex: `golangci-lint run`, `ruff check .`, `npm run lint`]
+* **Security Scanner:** [Ex: `gosec ./...`, `bandit -r src/`, `npm audit`]
+
+**Frontend (if applicable):**
+* **Test Command:** [Ex: `npx vitest run`, `npm test`]
+* **E2E Command:** [Ex: `npx playwright test`, `cypress run`]
+* **Coverage Command:** [Ex: `npx vitest run --coverage`]
+
+**Database:**
+* **Migration Tool:** [Ex: `golang-migrate`, `alembic`, `knex`, `prisma migrate`]
+* **Run Migrations:** [Ex: `migrate -path db/migrations -database $DATABASE_URL up`]
+* **Test DB Reset:** [Ex: `psql -U $DB_USER -c "DROP DATABASE IF EXISTS ${DB_NAME}_test..."`, or N/A]
+
+### DB Access (Docker)
+* **DB Container:** [Ex: myapp-postgres]
+* **DB User:** [Ex: postgres]
+* **DB Name:** [Ex: myapp_dev]
+* **DB Access Command:** `docker exec -i <container> psql -U <user> -d <db> -c "<query>"`
+
 ### Infrastructure & DevOps
 * **Hosting:** [Ex: AWS, Google Cloud, Azure, Vercel]
 * **Container:** [Ex: Docker, Podman]
@@ -316,6 +341,34 @@ Closes #42
 3. **Ask the team** - Check PROJECT_CONTEXT.md, issues, or previous implementations
 4. **Write tests** - Tests clarify intent and catch bugs early
 5. **Follow existing patterns** - Stay consistent with codebase
+
+---
+
+## 10. Lessons Learned
+
+### Architecture Patterns
+
+<!-- Add patterns discovered during development -->
+
+### Common Pitfalls
+
+<!-- Add common mistakes to avoid -->
+
+### Testing Insights
+
+<!-- Add testing discoveries and strategies -->
+
+### Performance Notes
+
+<!-- Add performance optimizations learned -->
+
+### Security Considerations
+
+<!-- Add security patterns and vulnerabilities to watch for -->
+
+### Tool-Specific Tips
+
+<!-- Add tips for specific tools/libraries -->
 
 ---
 

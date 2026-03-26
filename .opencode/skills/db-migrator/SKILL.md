@@ -14,12 +14,10 @@ Safely manage database schema changes with proper migration practices.
 
 ### Prerequisites
 **CRITICAL**: Read `PROJECT_CONTEXT.md` for:
-- Database type (PostgreSQL, MySQL, MongoDB, etc.)
-- Migration tool (Prisma, Knex, Alembic, GORM, etc.)
 - Migration naming conventions
 - Environment handling (dev, staging, prod)
 
-Use MCP `db-query` to inspect current schema.
+Inspect the current schema using docker exec from PROJECT_CONTEXT.md → Dev Commands → DB Access.
 
 ### Migration Workflow
 
@@ -57,75 +55,56 @@ Use MCP `db-query` to inspect current schema.
 
 ### Step 1: Analyze Schema Changes
 
-Use MCP `db-query` to get current schema:
-```sql
--- PostgreSQL
-SELECT table_name, column_name, data_type, is_nullable
-FROM information_schema.columns
-WHERE table_schema = 'public'
-ORDER BY table_name, ordinal_position;
+Run the following commands (substituting values from PROJECT_CONTEXT.md → Dev Commands → DB Access):
 
--- Get indexes
-SELECT indexname, indexdef
-FROM pg_indexes
-WHERE schemaname = 'public';
+```bash
+# List all tables and columns
+docker exec -i ${DB_CONTAINER} psql -U ${DB_USER} -d ${DB_NAME} -c "
+  SELECT table_name, column_name, data_type, is_nullable
+  FROM information_schema.columns
+  WHERE table_schema = 'public'
+  ORDER BY table_name, ordinal_position;
+"
 
--- Get constraints
-SELECT conname, contype, conrelid::regclass
-FROM pg_constraint;
+# List indexes
+docker exec -i ${DB_CONTAINER} psql -U ${DB_USER} -d ${DB_NAME} -c "
+  SELECT indexname, indexdef FROM pg_indexes WHERE schemaname = 'public';
+"
+
+# List constraints
+docker exec -i ${DB_CONTAINER} psql -U ${DB_USER} -d ${DB_NAME} -c "
+  SELECT conname, contype, conrelid::regclass FROM pg_constraint;
+"
 ```
 
 ### Step 2: Generate Migration
 
-#### Prisma Example
+#### golang-migrate
 ```bash
-# Generate migration
-npx prisma migrate dev --name add_user_refresh_token
+# Criar nova migration
+migrate create -ext sql -dir db/migrations -seq add_user_refresh_token
 
-# Migration file: prisma/migrations/20240315_add_user_refresh_token/
+# Aplicar migrations
+migrate -path db/migrations -database $DATABASE_URL up
+
+# Rollback
+migrate -path db/migrations -database $DATABASE_URL down 1
+
+# Status
+migrate -path db/migrations -database $DATABASE_URL version
 ```
 
-#### Knex Example
-```bash
-# Create migration
-npx knex migrate:make add_user_refresh_token
-```
+Exemplo de arquivos SQL gerados:
+```sql
+-- 000001_add_user_refresh_token.up.sql
+ALTER TABLE users ADD COLUMN refresh_token VARCHAR(512);
+ALTER TABLE users ADD COLUMN token_expires_at TIMESTAMPTZ;
+CREATE INDEX idx_users_refresh_token ON users(refresh_token);
 
-```javascript
-// migrations/20240315_add_user_refresh_token.js
-exports.up = function(knex) {
-  return knex.schema.alterTable('users', (table) => {
-    table.string('refresh_token', 512).nullable();
-    table.timestamp('token_expires_at').nullable();
-    table.index('refresh_token');
-  });
-};
-
-exports.down = function(knex) {
-  return knex.schema.alterTable('users', (table) => {
-    table.dropIndex('refresh_token');
-    table.dropColumn('token_expires_at');
-    table.dropColumn('refresh_token');
-  });
-};
-```
-
-#### Alembic Example (Python)
-```bash
-alembic revision --autogenerate -m "add_user_refresh_token"
-```
-
-```python
-# alembic/versions/20240315_add_user_refresh_token.py
-def upgrade():
-    op.add_column('users', sa.Column('refresh_token', sa.String(512)))
-    op.add_column('users', sa.Column('token_expires_at', sa.DateTime()))
-    op.create_index('ix_users_refresh_token', 'users', ['refresh_token'])
-
-def downgrade():
-    op.drop_index('ix_users_refresh_token')
-    op.drop_column('users', 'token_expires_at')
-    op.drop_column('users', 'refresh_token')
+-- 000001_add_user_refresh_token.down.sql
+DROP INDEX IF EXISTS idx_users_refresh_token;
+ALTER TABLE users DROP COLUMN IF EXISTS token_expires_at;
+ALTER TABLE users DROP COLUMN IF EXISTS refresh_token;
 ```
 
 ### Step 3: Migration Safety Rules
@@ -208,22 +187,22 @@ Create in `agents/tasks/migration-plan-<issue-num>.md`:
 ### Migration
 ```bash
 # Development
-npm run migrate:dev
+migrate -path db/migrations -database $DATABASE_URL up
 
 # Staging
-npm run migrate:staging
+DATABASE_URL=$STAGING_DATABASE_URL migrate -path db/migrations -database $DATABASE_URL up
 
 # Production
-npm run migrate:prod
+DATABASE_URL=$PROD_DATABASE_URL migrate -path db/migrations -database $DATABASE_URL up
 ```
 
 ### Rollback Plan
 ```bash
 # If issues occur
-npm run migrate:rollback
+migrate -path db/migrations -database $DATABASE_URL down 1
 
-# Verify rollback
-npm run db:status
+# Verify status
+migrate -path db/migrations -database $DATABASE_URL version
 ```
 
 ### Post-Migration
@@ -244,14 +223,13 @@ npm run db:status
 ### Step 6: Validation
 
 ```bash
-# Check migration syntax
-npm run migrate:validate
-
-# Dry run (if supported)
-npm run migrate:dry-run
+# Check current migration version
+migrate -path db/migrations -database $DATABASE_URL version
 
 # Test rollback
-npm run migrate:up && npm run migrate:down && npm run migrate:up
+migrate -path db/migrations -database $DATABASE_URL up && \
+migrate -path db/migrations -database $DATABASE_URL down 1 && \
+migrate -path db/migrations -database $DATABASE_URL up
 ```
 
 ### Output Format
@@ -284,4 +262,4 @@ Ready for: @executor to implement application changes
 ### Integration
 - Used by: `planner-backend`
 - Reports to: `todo-manager`
-- Uses: MCP `db-query`
+- Uses: docker exec psql (commands from PROJECT_CONTEXT.md → Dev Commands → DB Access)

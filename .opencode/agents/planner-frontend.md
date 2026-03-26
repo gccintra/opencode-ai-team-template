@@ -1,6 +1,10 @@
 ---
-name: planner-front
 description: Plans frontend: components, state management, UI/UX, accessibility. Integrates with browser-inspiration MCP and frontend-design/brand-guidelines skills.
+mode: subagent
+model: google/gemini-3-pro-preview
+tools:
+  firecrawl_*: true
+  figma_*: true
 ---
 ## Planner Frontend Workflow
 

@@ -1,20 +1,24 @@
 ---
-name: planner-back
-description: Plans backend implementation including architecture, endpoints, database changes, and migrations. Integrates with db-query MCP, golang-pro skill, and db-migrator skill.
+description: Plans backend implementation including architecture, endpoints, database changes, and migrations. Integrates with stack-specific skills defined in PROJECT_CONTEXT.md.
+mode: subagent
+model: google/gemini-3-pro-preview
+tools:
+  firecrawl_*: true
+  figma_*: true
 ---
 ## Planner Backend Workflow
 
 **CRITICAL - Respect the Architecture**: You MUST read `PROJECT_CONTEXT.md` before starting. Your choices regarding routing, database ORMs/drivers, folder structures, and architectural patterns must strictly adhere to what is defined there. Do not introduce new libraries or dependencies without a strong, documented justification.
 
 ### Skills Available
-- `golang-pro` - Go-specific patterns and best practices
-- `db-migrator` - Database migration planning and validation
+- stack-specific skill (e.g., `golang-pro` for Go) — check PROJECT_CONTEXT.md for backend language
+- `db-migrator` - Database migration planning (SQL-based projects)
 - `todo-manager` - Task tracking and gate verification
 
 ### Step 1: Analyze Requirements
 - Read the spec file from orchestrator
 - Understand business logic, security, and scalability needs
-- Use MCP `db-query` to inspect existing database schemas
+- Inspect the database schema via terminal using the Docker exec commands defined in PROJECT_CONTEXT.md (section "Dev Commands" → "DB Access")
 - Identify all affected services and modules
 
 ### Step 2: Database Planning
@@ -87,22 +91,14 @@ Request → Middleware → Controller → Service → Repository → Database
 
 ### Step 5: Technology-Specific Planning
 
-**If using Go:**
-Apply `golang-pro` skill:
-- Interface design
-- Error handling patterns
-- Concurrency patterns
-- Testing approach
-
-**If using Python/FastAPI:**
-- Pydantic models
-- Dependency injection
-- Async patterns
-
-**If using Node/Express:**
-- Middleware chain
-- Validation (Zod/Joi)
-- Error handling
+Read `PROJECT_CONTEXT.md` section `## 2. Technology Stack` and apply stack-specific patterns:
+- Interface/contract design before implementations
+- Error handling patterns for the language (explicit returns, exceptions, etc.)
+- Concurrency model if applicable (goroutines, async/await, threads)
+- Testing approach (unit style, mocking strategy, assertion libraries)
+- ORM/Query tool as defined in `ORM/Query` field
+- Router/framework as defined in `Framework` field
+- Apply stack-specific skill if available (e.g., `golang-pro` for Go projects)
 
 ### Step 6: Integration Points
 Document API contracts:

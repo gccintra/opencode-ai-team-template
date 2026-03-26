@@ -20,52 +20,30 @@ Execute all tests using the project's testing framework and capture results for 
 - Coverage thresholds
 
 ### Step 1: Environment Check
-Verify test environment is ready:
-```bash
-# Check for test dependencies
-npm list --depth=0 | grep -E "(jest|vitest|playwright)"
-# or
-pip list | grep pytest
-
-# Check for test configuration
-ls -la jest.config.* vitest.config.* pytest.ini setup.cfg pyproject.toml
-```
+Read `PROJECT_CONTEXT.md` → `## 2. Technology Stack — Dev Commands` and verify:
+- Backend test tool is available (check `Test Command`)
+- Frontend test tool is available (check Frontend `Test Command`, if applicable)
+- E2E tool is available (check `E2E Command`, if applicable)
 
 ### Step 2: Run Unit Tests
-Use MCP `testing-tools` for execution:
-
-**JavaScript/TypeScript:**
+Use the **Test Command** from `PROJECT_CONTEXT.md` (backend):
 ```bash
-npm run test -- --coverage --reporter=verbose
-# or
-npx vitest run --coverage
-```
-
-**Python:**
-```bash
-pytest -v --cov=src --cov-report=term-missing
-```
-
-**Go:**
-```bash
-go test -v -race -cover ./...
+# Example: go test -v -race -cover ./...
+# Example: pytest -v
+# Example: npx vitest run
+<use command from PROJECT_CONTEXT.md>
 ```
 
 ### Step 3: Run Integration Tests
-```bash
-# If separate from unit tests
-npm run test:integration
-# or
-pytest tests/integration/ -v
-```
+Use the backend **Test Command** with integration tag/directory if defined in PROJECT_CONTEXT.md.
+If no separate integration command, include integration tests in Step 2.
 
 ### Step 4: Run E2E Tests
+Use the **E2E Command** from `PROJECT_CONTEXT.md` (if applicable):
 ```bash
-# Playwright
-npx playwright test --reporter=list
-
-# Cypress
-npx cypress run
+# Example: npx playwright test --reporter=list
+# Example: cypress run
+<use E2E command from PROJECT_CONTEXT.md, or skip if N/A>
 ```
 
 ### Step 5: Capture Results
@@ -173,16 +151,8 @@ Check against threshold:
 ```
 
 ### Test Isolation
-Before running tests, ensure:
-```bash
-# Reset test database if applicable
-npm run db:test:reset
-
-# Clear test caches
-npm run test:clear-cache
-# or
-pytest --cache-clear
-```
+Before running tests, use **Test DB Reset** from `PROJECT_CONTEXT.md` if applicable.
+Prefer test transactions with rollback when the framework supports it.
 
 ### Output Format
 ```
