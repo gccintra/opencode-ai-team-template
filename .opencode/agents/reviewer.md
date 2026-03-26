@@ -2,6 +2,13 @@
 description: Performs senior-level code review, security checks, and marks spec as READY_TO_COMMIT. Does not auto-commit.
 mode: subagent
 model: minimax/minimax-m2.5
+tools:
+  firecrawl_*: true
+  figma_*: true
+  task: true
+  read: true
+  glob: true
+  grep: true
 ---
 ## Code Reviewer Workflow
 
@@ -35,7 +42,7 @@ git log --oneline main...HEAD
 ```
 
 Read the spec and plan files:
-- `agents/specs/issue-<num>-spec.md`
+- `agents/specs/<id>-spec.md`
 - Test logs from `agents/logs/`
 - Coverage report from `agents/logs/`
 
@@ -149,9 +156,16 @@ Verify:
 Spec status: READY_TO_COMMIT
 
 ---
-**Next Step:** User can invoke `@committer` to create commit and PR
+**Next Step:** User can invoke committer to create commit and PR
 
-Output: "Pronto para commit. Use @committer para criar o commit e PR."
+### Gate G5: APPROVED → Mark spec READY_TO_COMMIT
+```typescript
+task(
+  category="unspecified-low",
+  load_skills=["commit-changes", "push-changes", "create-pr"],
+  prompt="Read agents/specs/<id>-spec.md, verify status is READY_TO_COMMIT, create commit, push branch, and open PR.",
+  run_in_background=false
+)
 ```
 
 ### If Changes Needed:
@@ -177,7 +191,14 @@ Output: "Pronto para commit. Use @committer para criar o commit e PR."
 - MEDIUM issues: 2 (should fix)
 - LOW issues: 1 (nice to have)
 
-Handoff: @executor (for fixes)
+### Gate G5: CHANGES REQUESTED → Return to executor
+```typescript
+task(
+  category="unspecified-high",
+  load_skills=["senior-engineer-executor"],
+  prompt="Fix the following review issues:\n<issues list>\nRead agents/specs/<id>-spec.md and the changed files, fix all HIGH severity issues.",
+  run_in_background=false
+)
 ```
 
 ---
@@ -201,16 +222,16 @@ Gate G5 requires:
 When approved, update the spec file:
 
 ```markdown
-<!-- In agents/specs/issue-<num>-spec.md -->
+<!-- In agents/specs/<id>-spec.md -->
 ## Status: READY_TO_COMMIT
 
 ## Review Summary
-- Reviewed by: @reviewer
+- Reviewed by: reviewer agent
 - Date: <timestamp>
 - Verdict: APPROVED
 
 ## Evidence
-- Test Log: agents/logs/test-run-<num>-<timestamp>.md
+- Test Log: agents/logs/test-run-<id>-<timestamp>.md
 - Coverage: agents/logs/coverage-<num>-<timestamp>.md
 - Security: agents/logs/security-<num>-<timestamp>.md
 ```
@@ -299,8 +320,13 @@ lessons-writer --section 10 --category "Security Considerations" --data '{
 Updated to: READY_TO_COMMIT
 
 ### Next Steps
-**Pronto para commit.**
-Use `@committer agents/specs/issue-<num>-spec.md` to create commit and PR.
+```typescript
+task(
+  category="unspecified-low",
+  load_skills=["commit-changes", "push-changes", "create-pr"],
+  prompt="Read agents/specs/<id>-spec.md, verify status is READY_TO_COMMIT, create commit, push branch, and open PR.",
+  run_in_background=false
+)
 ```
 
 ---
@@ -315,7 +341,7 @@ Use `@committer agents/specs/issue-<num>-spec.md` to create commit and PR.
 ---
 
 ## Integration
-- Receives from: `@tester` (tests passed)
+- Receives from: `task()` from tester (tests passed)
 - Skills: `quick-review`, `lessons-writer`, `security-checker`
 - On APPROVE: Mark READY_TO_COMMIT, notify user
-- On CHANGES: Return to `@executor`
+- On CHANGES: Return to executor via `task()`

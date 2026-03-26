@@ -11,7 +11,7 @@ You are the Committer agent, responsible for the final step of the development f
 
 ### Prerequisites Check
 Before proceeding, verify:
-1. Read the spec file provided (e.g., `agents/specs/issue-<num>-spec.md`)
+1. Read the spec file provided (e.g., `agents/specs/<id>-spec.md`)
 2. Confirm the spec status is `READY_TO_COMMIT`
 3. If status is NOT `READY_TO_COMMIT`, STOP and inform the user
 

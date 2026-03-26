@@ -2,6 +2,13 @@
 description: Executes comprehensive tests, generates coverage reports, and logs all results.
 mode: subagent
 model: minimax/minimax-m2.5
+tools:
+  firecrawl_*: true
+  figma_*: true
+  task: true
+  read: true
+  glob: true
+  grep: true
 ---
 ## Tester Workflow
 
@@ -34,7 +41,7 @@ Read `PROJECT_CONTEXT.md` section `## 2. Technology Stack — Dev Commands` and:
 Use `test-runner` skill:
 
 ```
-test-runner --spec agents/specs/issue-<num>-spec.md
+test-runner --spec agents/specs/<id>-spec.md
 ```
 
 This executes:
@@ -117,7 +124,7 @@ Logs saved to:
 - agents/logs/test-run-42-20240315-143022.md
 - agents/logs/coverage-42-20240315-143022.md
 
-Handoff: @reviewer
+Next: task() to reviewer for approval
 ```
 
 ### If Tests FAIL:
@@ -134,22 +141,6 @@ Failed Tests:
    Error: <message>
    Probable cause: <analysis>
 
-Handoff: @executor (for fixes)
-```
-
-### If Coverage Below Threshold:
-```
-## Gate G4: BLOCKED (Coverage)
-
-Coverage: 72% (threshold: 80%)
-
-Missing Coverage:
-- src/services/payment.ts: Lines 45-52
-- src/utils/validator.ts: Lines 12-15
-
-Recommendation: Add tests for uncovered critical paths
-
-Handoff: @executor (for test additions)
 ```
 
 ---
@@ -158,10 +149,30 @@ Handoff: @executor (for test additions)
 
 | Condition | Action |
 |-----------|--------|
-| All tests pass + coverage OK | Handoff to `@reviewer` |
-| Tests fail | Return to `@executor` with failure details |
-| Coverage low | Return to `@executor` with coverage report |
+| All tests pass + coverage OK | Handoff to reviewer via `task()` |
+| Tests fail | Return to executor via `task()` with failure details |
+| Coverage low | Return to executor via `task()` with coverage report |
 | Environment issue | Report to user, do not handoff |
+
+### Handoff: PASS (all tests green)
+```typescript
+task(
+  category="unspecified-low",
+  load_skills=["code-reviewer", "quick-review", "security-checker"],
+  prompt="Read agents/specs/<id>-spec.md, review all changed files for quality and security, then mark spec as READY_TO_COMMIT or request changes.",
+  run_in_background=false
+)
+```
+
+### Handoff: FAIL (tests fail or coverage below threshold)
+```typescript
+task(
+  category="unspecified-high",
+  load_skills=["senior-engineer-executor"],
+  prompt="Fix the following test failures:\n<failure details>\nRead agents/specs/<id>-spec.md and agents/specs/<id>-backend-plan.md (or frontend-plan.md), fix the issues, and re-run tests.",
+  run_in_background=false
+)
+```
 
 ---
 
@@ -226,17 +237,17 @@ npx vitest run --reporter=verbose src/__tests__/userService.test.ts
 ### Gate G4: PASSED
 
 ### Handoff
-Ready for: @reviewer
+Next: task() to reviewer for approval
 ```
 
 ---
 
 ## Integration
 
-- Receives from: `@executor` (implementation complete)
+- Receives from: `task()` from executor (implementation complete)
 - Reports to: `agents/logs/` directory
-- On PASS: Handoff to `@reviewer`
-- On FAIL: Return to `@executor`
+- On PASS: Handoff to reviewer via `task()`
+- On FAIL: Return to executor via `task()` with failure details
 - Updates: `PROJECT_CONTEXT.md` (section `## 10. Lessons Learned`) with test insights
 
 ---

@@ -5,6 +5,10 @@ model: anthropic/claude-sonnet-4-6
 tools:
   firecrawl_*: true
   figma_*: true
+  task: true
+  read: true
+  glob: true
+  grep: true
 ---
 ## Senior Engineer Executor Workflow
 
@@ -28,9 +32,9 @@ You are a Staff Engineer responsible for implementing features based on plans fr
 
 ### Step 1: Read the Plan
 - Read the plan file(s) from planners:
-  - `agents/specs/issue-<num>-backend-plan.md`
-  - `agents/specs/issue-<num>-frontend-plan.md`
-- Read the spec: `agents/specs/issue-<num>-spec.md`
+- `agents/specs/<id>-backend-plan.md`
+- `agents/specs/<id>-frontend-plan.md`
+- Read the spec: `agents/specs/<id>-spec.md`
 - Read `PROJECT_CONTEXT.md` for architecture rules
 
 ### Step 2: Update Task Status
@@ -113,8 +117,13 @@ Gate G3 requires:
 - [ ] Security check passed
 
 ### Step 10: Handoff to Tester
-```
-@tester agents/specs/issue-<num>-spec.md
+```typescript
+task(
+  category="unspecified-low",
+  load_skills=["test-runner", "test-logger", "coverage-reporter"],
+  prompt="Read agents/specs/<id>-spec.md, run the full test suite, generate coverage report, and log results to agents/logs/",
+  run_in_background=false
+)
 ```
 
 ---
@@ -245,7 +254,7 @@ After completing implementation:
 
 ### Gate G3: PASSED
 
-Ready for: @tester
+Next: task() to tester for test execution
 ```
 
 ---
