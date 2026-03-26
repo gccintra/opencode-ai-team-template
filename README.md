@@ -154,7 +154,31 @@ USER
       │ GitHub Issue #<num>             │
       └──────────────┬──────────────────┘
                      │
+          ┌──────────▼──────────┐
+          │  PARALLEL INVESTIGATION │
+          │  [explore] [explore] │
+          │  [librarian]          │
+          └──────────┬──────────┘
+                     │
                      ▼
+         ┌───────────────────────┐
+         │      ORCHESTRATOR     │
+         │  issue-reader (A)     │
+         │  inline intake (B)    │
+         │  tech discussion      │
+         │  todo-manager         │
+         │  [Gate G1]            │
+         └──────────┬────────────┘
+               ┌────┴─────┐
+               ▼           ▼
+    ┌───────────────┐  ┌───────────────┐
+    │  PLANNER-FE   │  │  PLANNER-BE   │  ← parallel (run_in_background=true)
+    │ frontend-des. │  │  db-migrator  │
+    │ brand-guide.  │  │  golang-pro   │
+    │  [Gate G2]    │  │  [Gate G2]    │
+    └──────┬────────┘  └────────┬──────┘
+           └──────────┬─────────┘
+                      ▼
          ┌───────────────────────┐
          │      ORCHESTRATOR     │
          │  issue-reader (A)     │
@@ -530,6 +554,39 @@ The orchestrator asks 4 clarifying questions in one message (scope, acceptance c
 Or automatically triggered by orchestrator when issue has `hotfix` or `urgent` label.
 
 See [Hotfix Flow](#hotfix-flow) for the full bypass workflow.
+
+### explore
+
+**Purpose:** Contextual grep specialist for internal codebase exploration. Fires in parallel with other agents during the investigation phase.
+
+**How to invoke:** (called automatically by orchestrator)
+```
+task(subagent_type="explore", run_in_background=true, ...)
+```
+
+**What it does:**
+1. Searches local codebase for patterns, implementations, and code structure
+2. Runs in parallel with other explore/librarian agents
+3. Returns file paths with pattern descriptions and line numbers
+
+**Used by:** Orchestrator during Phase 0 (Intent Gate) and Step 1 (Context)
+
+### librarian
+
+**Purpose:** Reference specialist for external knowledge — official docs, GitHub examples, web best practices.
+
+**How to invoke:** (called automatically by orchestrator)
+```
+task(subagent_type="librarian", run_in_background=true, ...)
+```
+
+**What it does:**
+1. Searches official library docs via Context7
+2. Finds production examples on GitHub
+3. Looks up best practices via web search
+4. Returns actionable recommendations with code examples
+
+**Used by:** Orchestrator when unfamiliar libraries or external patterns are involved
 
 ---
 
