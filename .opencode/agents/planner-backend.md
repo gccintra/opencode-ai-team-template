@@ -5,6 +5,10 @@ model: google/gemini-3-pro-preview
 tools:
   firecrawl_*: true
   figma_*: true
+  task: true
+  read: true
+  glob: true
+  grep: true
 ---
 ## Planner Backend Workflow
 
@@ -30,7 +34,7 @@ Use `db-migrator` skill for any schema changes:
 
 ```
 # If schema changes needed
-db-migrator analyze --spec agents/specs/issue-<num>-spec.md
+db-migrator analyze --spec agents/specs/<id>-spec.md
 ```
 
 ### Step 3: Component Breakdown
@@ -167,7 +171,7 @@ Define testing approach:
 ```
 
 ### Step 9: Create Plan Document
-Save to `agents/specs/issue-<num>-backend-plan.md`:
+Save to `agents/specs/<id>-backend-plan.md`:
 
 ```markdown
 # Backend Plan: Issue #<num>
@@ -215,9 +219,13 @@ todo-manager add --category backend --task "<task description>"
 ```
 
 ### Step 11: Handoff
-Pass the plan document to executor:
-```
-@executor agents/specs/issue-<num>-backend-plan.md
+```typescript
+task(
+  category="unspecified-high",
+  load_skills=["senior-engineer-executor", "test-generator", "security-checker"],
+  prompt="Read agents/specs/<id>-spec.md and agents/specs/<id>-backend-plan.md, then implement all backend tasks with mandatory tests.",
+  run_in_background=false
+)
 ```
 
 **Principles**:

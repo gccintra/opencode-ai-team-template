@@ -5,6 +5,10 @@ model: google/gemini-3-pro-preview
 tools:
   firecrawl_*: true
   figma_*: true
+  task: true
+  read: true
+  glob: true
+  grep: true
 ---
 ## Planner Frontend Workflow
 
@@ -57,15 +61,20 @@ Before finalizing the plan, verify:
 - E2E tests for critical paths (via Playwright)
 
 ### Step 8: Create Plan Document
-- Save as `agents/specs/issue-<num>-frontend-plan.md`
+- Save as `agents/specs/<id>-frontend-plan.md`
 - Include component diagrams (ASCII or Mermaid)
 - List files to create/modify with purpose
 - Define dependencies between tasks
 
 ### Step 9: Handoff
-- Pass the plan document path to `@executor`
-- Ensure the plan is self-contained and actionable
-- Include references to spec and PROJECT_CONTEXT.md
+```typescript
+task(
+  category="visual-engineering",
+  load_skills=["frontend-design"],
+  prompt="Read agents/specs/<id>-spec.md and agents/specs/<id>-frontend-plan.md, then implement all frontend components and styles.",
+  run_in_background=false
+)
+```
 
 **Principles**:
 - User experience first, implementation details second
