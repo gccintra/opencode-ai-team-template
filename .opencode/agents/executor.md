@@ -125,17 +125,44 @@ After ANY correction from user or reviewer:
 
 1. **Acknowledge** the correction
 2. **Understand** the root cause
-3. **Update** `PROJECT_CONTEXT.md` (section `## 10. Lessons Learned`):
+3. **Update** `PROJECT_CONTEXT.md` using `lessons-writer` skill:
 
-```markdown
-### [Lesson Title]
-**Context:** <when this applies>
-**Mistake:** <what went wrong>
-**Prevention:** <how to avoid in future>
-**Learned from:** Issue #<num>, <date>
-```
+| Trigger | Section | Example |
+|---------|---------|---------|
+| Bug fix with non-obvious solution | Section 10 | "Race condition in token refresh" |
+| Domain-specific pattern discovered | Section 5 | "Order status transition rules" |
+| New code example that should be reused | Section 7 | "Error handling pattern" |
+| Library quirk discovered | Section 10 | "Zod async validation gotcha" |
 
 4. **Review** lessons at session start
+
+---
+
+## PROJECT_CONTEXT Updates
+
+The executor MUST update PROJECT_CONTEXT.md in these scenarios:
+
+| Scenario | Section to Update | When |
+|----------|-------------------|------|
+| Bug fix with non-obvious solution | Section 10 (Lessons) | After fixing a tricky bug |
+| Domain pattern discovered | Section 5 (Feature-Specific) | When implementing domain logic |
+| Reusable code pattern | Section 7 (Common Patterns) | When code should be reused |
+| Library-specific tip | Section 10 (Tool Tips) | When learning library quirks |
+
+**How to update:**
+```bash
+lessons-writer --section 10 --category "Common Pitfalls" --title "<pitfall name>"--data '<lesson data>'
+```
+
+**Example:**
+```markdown
+### 2024-01-15 - Common Pitfalls: Race Condition in User Session
+
+**Context:** Implementing JWT refresh tokens
+**Discovery:** Multiple concurrent requests could refresh the same token
+**Solution:** Added mutex lock around token refresh
+**Source:** Issue #42
+```
 
 ---
 

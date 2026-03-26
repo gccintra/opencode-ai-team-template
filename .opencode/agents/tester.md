@@ -238,3 +238,33 @@ Ready for: @reviewer
 - On PASS: Handoff to `@reviewer`
 - On FAIL: Return to `@executor`
 - Updates: `PROJECT_CONTEXT.md` (section `## 10. Lessons Learned`) with test insights
+
+---
+
+## PROJECT_CONTEXT Updates
+
+The tester MUST update PROJECT_CONTEXT.md in these scenarios:
+
+| Scenario | Section to Update | When |
+|----------|-------------------|------|
+| New testing pattern discovered | Section 10 (Testing Insights) | When test approach works particularly well |
+| Coverage gap identified | Section 5 (Feature-Specific) | When certain code paths are hard to test |
+| Flaky test discovered | Section 10 (Common Pitfalls) | When flaky test behavior is found |
+| New mock strategy | Section 10 (Testing Insights) | When mocking approach is established |
+
+**How to update:**
+```bash
+lessons-writer --section 10 --category "Testing Insights" --data '{
+  "discovery": "Using test containers for DB integration tests",
+  "application": "Spin up real DB in Docker for each test suite"
+}'
+```
+
+**Example:**
+```markdown
+### 2024-01-15 - Testing Insights: Database Integration Tests
+
+**Discovery:** Using testcontainers for real DB integration tests
+**Application:** Spin up PostgreSQL in Docker for each test suite, ensuring isolation
+**Source:** Issue #42
+```

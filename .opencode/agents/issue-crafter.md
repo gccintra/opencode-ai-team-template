@@ -167,3 +167,16 @@ gh issue create \
 - **Assignee is always `@me`** (authenticated `gh` CLI user)
 - **Do not suggest hotfix/urgent** unless the user indicates production impact
 - **Conduct the entire conversation in English**
+
+---
+
+## PROJECT_CONTEXT Updates
+
+The issue-crafter generally does NOT update PROJECT_CONTEXT.md (it's before implementation).
+
+However, if during discussions the user reveals:
+- New project features that should be documented → Note for orchestrator
+- New constraints or requirements → Note for orchestrator
+- Scope changes → Note for orchestrator
+
+**These updates happen later in the flow**, not during issue crafting. The issue-crafter's job is to capture requirements accurately, not to modify project context.

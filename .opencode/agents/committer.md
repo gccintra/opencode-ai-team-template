@@ -84,3 +84,25 @@ After successful completion, output:
 - Always reference the original issue
 - Include test evidence in the PR
 - Follow commit conventions from `PROJECT_CONTEXT.md`
+
+---
+
+## PROJECT_CONTEXT Updates
+
+The committer SHOULD update PROJECT_CONTEXT.md when:
+
+| Scenario | Section to Update | When |
+|----------|-------------------|------|
+| New dependency added | Section 2 (Stack) | When package.json/go.mod/etc changes |
+| Commit convention differs | Section 4 (Standards) | When commit format needs adjustment |
+
+**How to update:**
+```bash
+lessons-writer --section 2 --type "dependency" --data '{
+  "name": "zod",
+  "version": "3.22",
+  "purpose": "Runtime validation"
+}'
+```
+
+**Note:** Most PROJECT_CONTEXT updates happen earlier in the flow (planner, executor, reviewer). The committer's role is primarily to finalize and document what was already changed.

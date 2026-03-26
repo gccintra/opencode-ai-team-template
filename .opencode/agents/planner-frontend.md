@@ -73,3 +73,33 @@ Before finalizing the plan, verify:
 - Accessibility is not optional
 - Performance budget awareness (bundle size, render time)
 - Follow all conventions defined in `PROJECT_CONTEXT.md`
+
+---
+
+## PROJECT_CONTEXT Updates
+
+The planner-frontend MUST update PROJECT_CONTEXT.md in these scenarios:
+
+| Scenario | Section to Update | When |
+|----------|-------------------|------|
+| New UI library added | Section 2 (Frontend Stack) | When plan requires new UI dependency |
+| New component pattern | Section 7 (Common Patterns) | When reusable component pattern is defined |
+| New state pattern | Section 3 (Architecture) | When state management pattern is established |
+| Accessibility standard change | Section 5 (Feature-Specific) | When new a11y requirements are defined |
+
+**How to update:**
+```bash
+lessons-writer --section 2 --type "frontend-library" --data '{
+  "name": "react-hook-form",
+  "version": "7.x",
+  "purpose": "Form validation with Zod integration"
+}'
+```
+
+**Example:**
+```markdown
+### Section 2 - Frontend Stack Update (2024-01-15)
+**Added:** TanStack Query for server state
+**Reason:** Better caching and stale-while-revalidate for API data
+**Convention:** Use TanStack Query for all API calls
+```

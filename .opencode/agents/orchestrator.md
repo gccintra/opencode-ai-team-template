@@ -303,3 +303,29 @@ If issue only requires documentation:
 ### Handoff
 Delegating to: @planner-<type>
 ```
+
+---
+
+### PROJECT_CONTEXT Updates
+
+The orchestrator MUST update PROJECT_CONTEXT.md in these scenarios:
+
+| Scenario | Section to Update | When |
+|----------|-------------------|------|
+| Major scope change | Section 1 (Overview) | When issue affects project scope |
+| Architecture decision | Section 3 (Architecture) | During approach discussion |
+| New constraint | Section 8 (Project-Specific Rules) | When constraint is discovered |
+
+**How to update:**
+1. Use `lessons-writer` skill with the appropriate section
+2. Append new information, don't overwrite
+3. Always include date and source (Issue #)
+
+**Example call:**
+```
+lessons-writer --section 3 --type "architecture-decision" --data '{
+  "name": "Event-Driven Orders",
+  "decision": "Use event-driven architecture for order processing",
+  "rationale": "Orders require multiple independent steps"
+}'
+```

@@ -226,3 +226,33 @@ Pass the plan document to executor:
 - Clean architecture layers
 - Database-first design for schema changes
 - Everything must align with `PROJECT_CONTEXT.md`
+
+---
+
+## PROJECT_CONTEXT Updates
+
+The planner-backend MUST update PROJECT_CONTEXT.md in these scenarios:
+
+| Scenario | Section to Update | When |
+|----------|-------------------|------|
+| New library added | Section 2 (Stack) | When plan requires new dependency |
+| New database table/schema | Section 2 (Database) | When migration creates new schema |
+| New API pattern discovered | Section 7 (Patterns) | When new API pattern is established |
+| New service architecture | Section 3 (Architecture) | When architectural pattern is defined |
+
+**How to update:**
+```bash
+lessons-writer --section 2 --type "dependency" --data '{
+  "name": "new-package",
+  "version": "1.0.0",
+  "purpose": "Rate limiting"
+}'
+```
+
+**Example:**
+```markdown
+### Section 2 - Technology Stack Update (2024-01-15)
+**Added:** Redis for caching
+**Reason:** Performance optimization for session tokens
+**Convention:** Use Redis for all time-limited data
+```

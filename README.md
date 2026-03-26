@@ -29,6 +29,7 @@ This template gives you a complete AI engineering team operating inside [OpenCod
 
 | Agent | Role | Model | Mode |
 |-------|------|-------|------|
+| `project-setup` | Entry point for new projects — analyzes codebase, discusses architecture, creates PROJECT_CONTEXT.md | claude-sonnet-4-6 | primary |
 | `issue-crafter` | Discusses requirements and creates GitHub issues | claude-sonnet-4-6 | primary |
 | `orchestrator` | Reads issues or prompts, discusses approach, creates specs, routes to planners | gemini-3-pro | primary |
 | `planner-frontend` | Plans UI, components, state, and accessibility | gemini-3-pro | subagent |
@@ -222,6 +223,33 @@ USER
 
 ## Quick Start
 
+### Step 0: Project Setup (First Time Only)
+
+**Initialize your PROJECT_CONTEXT.md:**
+
+```
+@project-setup
+```
+
+The agent analyzes your codebase, detects the tech stack from config files (package.json, go.mod, requirements.txt, etc.), and guides you through an interactive conversation to populate `PROJECT_CONTEXT.MD` — the single source of truth that all other agents read before acting.
+
+**Quick mode (auto-fill with sensible defaults):**
+```
+@project-setup --quick
+```
+
+**What it detects automatically:**
+- Frontend: Next.js, React, Vue, Angular, Svelte, Vite, TailwindCSS, etc.
+- Backend: Go (Gin/Echo/Chi), Python (FastAPI/Django), Node.js (Express), etc.
+- Database: PostgreSQL, MySQL, MongoDB, Redis, etc.
+- Testing: Vitest, Jest, Playwright, Cypress, pytest, go test
+- CI/CD: GitHub Actions, GitLab CI, Jenkins
+- Build commands: from package.json, Makefile, docker-compose
+
+**After setup, you can proceed with:**
+
+---
+
 ### Option A: Full issue-tracked flow
 
 **1. Create and craft an issue**
@@ -261,6 +289,43 @@ The orchestrator asks 4 clarifying questions in one message (scope, acceptance c
 ---
 
 ## Agents
+
+### project-setup
+
+**Purpose:** Entry point for new projects. Analyzes the codebase, detects the tech stack from config files, discusses architecture decisions with the user, and creates a comprehensive `PROJECT_CONTEXT.MD` that all other agents will reference.
+
+**How to invoke:**
+```
+@project-setup
+```
+
+**Quick mode:**
+```
+@project-setup --quick
+```
+
+**What it does:**
+1. Scans project files (package.json, go.mod, requirements.txt, docker-compose.yml, etc.)
+2. Detects: framework, language, database, testing tools, CI/CD, build commands
+3. Presents a structured summary of detected values
+4. Discusses architecture pattern (Clean Architecture, MVC, Hexagonal, etc.)
+5. Clarifies project-specific conventions
+6. Writes `PROJECT_CONTEXT.MD` with all sections populated
+7. Confirms next steps
+
+**Auto-detects from:**
+| File | Detection |
+|------|-----------|
+| `package.json` | Next.js, React, Vue, dependencies, scripts |
+| `go.mod` | Go version, modules, framework hints |
+| `requirements.txt` | Python version, FastAPI, Django, etc. |
+| `docker-compose.yml` | Services, databases, containers |
+| `.github/workflows/` | CI/CD commands, test commands |
+| `Makefile` | Build and test commands |
+
+**Output:** Fully populated `PROJECT_CONTEXT.MD` + recommended next steps
+
+---
 
 ### issue-crafter
 
@@ -800,13 +865,24 @@ PLANNING → IN_PROGRESS → TESTING → REVIEW → READY_TO_COMMIT → DONE
 
 ### Quick Setup (Recommended)
 
-Instead of filling `PROJECT_CONTEXT.md` manually, use the `context-setup` skill:
+Instead of filling `PROJECT_CONTEXT.md` manually, use the `@project-setup` agent or `context-setup` skill:
 
+**Interactive setup (recommended):**
+```
+@project-setup
+```
+
+**Quick mode (auto-detect everything):**
+```
+@project-setup --quick
+```
+
+The agent analyzes your codebase, detects the tech stack from config files, and guides you through an interactive conversation. It offers smart suggestions based on detected patterns and writes the file after your approval.
+
+**Or use the skill directly:**
 ```
 context-setup
 ```
-
-The skill opens an interactive conversation, asks about your stack, architecture, and tooling, offers smart suggestions, and writes the file for you after explicit approval. Run it once when starting a new project, or whenever the tech stack changes.
 
 ### Step 1: Fill in PROJECT_CONTEXT.md
 
@@ -1030,14 +1106,35 @@ In `PROJECT_CONTEXT.md`, set the coverage threshold in the Technology Stack sect
 
 ## Project Checklist
 
+### Initial Setup (ONE-TIME)
 - [ ] Clone the template
-- [ ] Run `context-setup` skill (or fill `PROJECT_CONTEXT.md` manually)
+- [ ] Run `@project-setup` to configure PROJECT_CONTEXT.md
 - [ ] Configure `.opencode/opencode.json` (adjust models, enable/disable MCPs)
 - [ ] Authenticate GitHub CLI: `gh auth login`
-- [ ] Create first issue with `@issue-crafter` or go directly with `@orchestrator <prompt>`
+
+### Per-Issue Workflow
+- [ ] Create issue with `@issue-crafter` or go directly with `@orchestrator <prompt>`
 - [ ] Run `@orchestrator #<num>` (or `@orchestrator <prompt>`) and monitor the flow
 - [ ] When spec is `READY_TO_COMMIT`, trigger `@committer`
 - [ ] Review `agents/tasks/lessons.md` after each cycle
+
+---
+
+## PROJECT_CONTEXT Maintenance
+
+**PROJECT_CONTEXT.md is a living document.** It's automatically updated by agents during the workflow:
+
+| When | Which Agent | What Section |
+|------|-------------|--------------|
+| Bug fix with non-obvious solution | Executor | Section 10 (Lessons) |
+| New library added | Planner | Section 2 (Stack) |
+| Architecture decision | Orchestrator | Section 3 (Architecture) |
+| Convention violation found | Reviewer | Section 4 (Standards) |
+| Security vulnerability | Reviewer/Hotfix | Section 10 (Security) |
+| New pattern discovered | Executor/Reviewer | Section 7 (Patterns) |
+| Production incident | Hotfix | Section 10 (Pitfalls) |
+
+**Manual updates are rarely needed.** Agents call the `lessons-writer` skill to update relevant sections.
 
 ---
 

@@ -274,3 +274,38 @@ These can be deferred:
 - Coverage threshold
 - Documentation updates
 - Code review depth
+
+---
+
+## PROJECT_CONTEXT Updates
+
+After hotfix resolution, the hotfix agent MUST update PROJECT_CONTEXT.md:
+
+| Scenario | Section to Update | When |
+|----------|-------------------|------|
+| Production bug root cause | Section 10 (Common Pitfalls) | Document the bug and prevention |
+| Hotfix workaround applied | Section 10 (Common Pitfalls) | Mark as technical debt |
+| Monitoring gap identified | Section 6 (Workflow) | Add monitoring requirements |
+| Security vulnerability found | Section 10 (Security) | Document prevention |
+
+**How to update:**
+```bash
+lessons-writer --section 10 --category "Common Pitfalls" --data '{
+  "title": "Production Crash: Null Email",
+  "symptom": "App crashed when user had null email",
+  "cause": "Missing null check in processUser",
+  "prevention": "Always validate nullable fields before processing",
+  "source": "Hotfix #42"
+}'
+```
+
+**Example:**
+```markdown
+### 2024-01-15 - Common Pitfalls: Null Email Crash
+
+**Symptom:** Application crashed in production when user had null email
+**Cause:** Missing null check in processUser function
+**Prevention:** Always validate nullable fields before processing. Add schema validation at API boundary.
+**Follow-up:** Issue #45 created for proper fix
+**Source:** Hotfix #42
+```

@@ -231,6 +231,50 @@ lessons-writer --category "<category>" --lesson "<description>"
 
 ---
 
+## PROJECT_CONTEXT Updates
+
+The reviewer MUST update PROJECT_CONTEXT.md in these scenarios:
+
+| Scenario | Section to Update | When |
+|----------|-------------------|------|
+| Convention violation found | Section 4 (Standards) | When code doesn't follow conventions |
+| Performance optimization discovered | Section 10 (Lessons) | After reviewing perf-related code |
+| Security vulnerability found | Section 10 (Security) | After security check |
+| Code pattern that should be standard | Section 7 (Patterns) | When patternshould be reused |
+| Workflow improvement needed | Section 6 (Workflow) | When process could be improved |
+| Principle discovered | Section 9 (When in Doubt) | When heuristic is found |
+
+**How to update:**
+```bash
+# Convention change
+lessons-writer --section 4 --type "convention" --data '{
+  "name": "Error Handling",
+  "update": "Always wrap async calls in try-catch"
+}'
+
+# Security finding
+lessons-writer --section 10 --category "Security Considerations" --data '{
+  "vulnerability": "SQL Injection",
+  "prevention": "Always use parameterized queries"
+}'
+```
+
+**Example updates:**
+```markdown
+### Section 4 - Coding Standards Update (2024-01-15)
+**Convention:** All async functions must have error handling
+**Reason:** Found 3 instances of unhandled promise rejections
+**Migration:** Wrap existing async calls in try-catch
+
+### Section 10 - Security: SQL Injection Prevention
+**Vulnerability:** User input directly concatenated in queries
+**Mitigation:** Changed to parameterized queries
+**Prevention:** Always use parameterized queries, never concatenate user input
+**Source:** Code review, Issue #45
+```
+
+---
+
 ## Output Format
 
 ```
