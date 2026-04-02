@@ -84,6 +84,16 @@
 * **File Storage:** [Ex: AWS S3, Google Cloud Storage]
 * **Analytics:** [Ex: Segment, Mixpanel, Amplitude]
 
+### Design & Figma
+*(Used by html-to-figma and figma-implement-design skills)*
+* **Figma File Key:** [Ex: `ubx8p2dAGtO3cmhfUEJkCu` — extracted from figma.com/design/:fileKey/...]
+* **Figma File URL:** [Ex: https://www.figma.com/design/ubx8p2dAGtO3cmhfUEJkCu/ProjectName]
+* **Design Tokens:** [Ex: CSS custom properties in src/styles/tokens.css, or Tailwind config]
+* **Primary Font:** [Ex: Inter, Geist, DM Sans]
+* **Color Palette:** [Ex: --color-primary: #111, --color-accent: #6366f1]
+* **Icon Library:** [Ex: Lucide, Heroicons, Phosphor — or "from Figma assets only"]
+* **Component Library:** [Ex: Shadcn/ui, Radix, or "custom only"]
+
 ---
 
 ## 3. Architecture and Design Patterns
@@ -293,6 +303,16 @@ Closes #42
 4. Commit frequently with clear messages
 5. Document non-obvious decisions
 
+### Frontend / UI Tasks
+* Every new screen or UI component destined for Figma → use `html-to-figma` skill
+* Target Figma file is defined in **Section 2 → Design & Figma → Figma File Key**
+* Implementing an existing Figma design into code → use `figma-implement-design` skill
+* All HTML/CSS must use CSS custom properties (design tokens), flexbox/grid auto layout, semantic HTML5, and WCAG AA accessibility
+
+### Database Tasks
+* Every schema change → use `db-migrator` skill
+* Always write rollback (down) migration alongside up migration
+
 ### Quality Gates
 1. **Code Quality:** Must pass linting and formatting
 2. **Tests:** Must pass all tests, 80%+ coverage
@@ -369,6 +389,10 @@ Closes #42
 ### Tool-Specific Tips
 
 <!-- Add tips for specific tools/libraries -->
+
+### Design & UI
+
+<!-- Add UI/Figma patterns, design token decisions, and component conventions discovered during development -->
 
 ---
 

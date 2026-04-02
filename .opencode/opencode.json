@@ -1,6 +1,5 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["oh-my-opencode"],
   "permission": {
     "skill": {
       "*": "allow"
@@ -12,13 +11,13 @@
       "type": "remote",
       "url": "https://mcp.figma.com/mcp",
       "oauth": {
-        "clientId": "your_id",
-        "clientSecret": "your_secret"
+        "clientId": "${FIGMA_CLIENT_ID}",
+        "clientSecret": "${FIGMA_CLIENT_SECRET}"
       }
     },
     "firecrawl": {
       "type": "remote",
-      "url": "https://mcp.firecrawl.dev/your_key/v2/mcp",
+      "url": "https://mcp.firecrawl.dev/${FIRECRAWL_API_KEY}/v2/mcp",
       "enabled": true
     }
   }

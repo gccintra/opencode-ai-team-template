@@ -148,7 +148,7 @@ Example: `test-run-42-20240315-143022.md`
 Save to `agents/logs/` directory
 
 #### Step 4: Update Index
-Append to `agents/logs/index.md`:
+Append to `agents/logs/index.md` (create the file if it doesn't exist):
 ```markdown
 | Date | Issue | Tests | Result | Log |
 |------|-------|-------|--------|-----|

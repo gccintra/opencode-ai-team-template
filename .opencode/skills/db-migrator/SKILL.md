@@ -260,6 +260,6 @@ Ready for: @executor to implement application changes
 ```
 
 ### Integration
-- Used by: `planner-backend`
-- Reports to: `todo-manager`
+- Used by: `executor` (when tasks involve database schema changes)
+- Reports to: `todo-manager` — migration plan document linked in `agents/tasks/<id>.md`
 - Uses: docker exec psql (commands from PROJECT_CONTEXT.md → Dev Commands → DB Access)

@@ -1,12 +1,16 @@
 ---
-description: Expedited workflow for critical production fixes. Bypasses Orchestrator and Planners. Invoke directly for URGENT/HOTFIX issues.
+description: Expedited workflow for critical production fixes. Bypasses Orchestrator's discussion phase. Creates unified task file and delegates directly to executor.
 mode: primary
 model: anthropic/claude-sonnet-4-6
 tools:
   firecrawl_*: true
   figma_*: true
+  task: true
+  read: true
+  glob: true
+  grep: true
 ---
-## Hotfix Mode Skill
+## Hotfix Agent Workflow
 
 Fast-track workflow for urgent production issues that require immediate attention.
 
@@ -23,192 +27,175 @@ Fast-track workflow for urgent production issues that require immediate attentio
 - Performance improvements
 - Refactoring needs
 
-### Hotfix Workflow
+---
+
+### Hotfix Flow
 
 ```
-┌─────────────────────────────────────────────────────┐
-│  HOTFIX TRIGGERED                                   │
-│  Skip: Orchestrator, Planners                       │
-│  Go directly to: Executor                           │
-└───────────────────────────┬─────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────┐
-│  EXECUTOR (Direct)                                  │
-│  1. Read issue/problem description                  │
-│  2. Identify root cause (minimal investigation)     │
-│  3. Implement minimal fix                           │
-│  4. Create regression test                          │
-│  5. Run security-checker (abbreviated)              │
-└───────────────────────────┬─────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────┐
-│  TESTER (Fast Track)                                │
-│  1. Run affected test suite only                    │
-│  2. Run regression test for fix                     │
-│  3. Smoke test critical paths                       │
-└───────────────────────────┬─────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────┐
-│  COMMITTER (Immediate)                              │
-│  Branch: hotfix/issue-<num>-<desc>                  │
-│  Commit: fix!: <description>                        │
-│  PR: Marked as HOTFIX, priority review              │
-└─────────────────────────────────────────────────────┘
+HOTFIX TRIGGERED
+     │
+     ▼
+HOTFIX AGENT (this agent)
+  - Creates agents/tasks/<id>.md (minimal)
+  - Delegates to executor
+     │
+     ▼
+EXECUTOR (direct)
+  - Read issue/problem description
+  - Identify root cause (15-minute time-box)
+  - Implement minimal fix
+  - Create regression test
+  - Run security-checker (abbreviated)
+     │
+     ▼
+TESTER (fast-track)
+  - Run affected test suite only
+  - Run the new regression test
+  - Smoke test critical paths
+     │
+     ▼
+REVIEWER (abbreviated)
+  - Quick security scan
+  - Verify regression test
+  - Mark READY_TO_COMMIT → STOP
+     │
+     ▼
+USER triggers @committer
+  - Branch: hotfix/<id>-<desc>
+  - Commit: fix!: <description>
+  - PR: labelled hotfix, priority review
 ```
 
-### Step 1: Acknowledge Hotfix
+---
 
-Create minimal spec:
+### Step 1: Create Unified Task File
+
+Create `agents/tasks/<id>.md` with minimal hotfix structure:
+
 ```markdown
-# HOTFIX: Issue #<num>
+# Task: <id> — HOTFIX: <title>
 
-## Status: HOTFIX_IN_PROGRESS
+## Status: IN_PROGRESS
 
-## Problem
+## Metadata
+- **Type:** bug
+- **Scope:** <frontend|backend|full-stack>
+- **Priority:** high
+- **Source:** GitHub Issue #<num> | Direct report
+- **Mode:** HOTFIX
+
+## Problem Statement
 <brief description of the production issue>
 
 ## Impact
-- Users affected: <count/scope>
-- Business impact: <description>
-- Started: <timestamp>
+- **Users affected:** <count/scope>
+- **Business impact:** <description>
+- **Started:** <timestamp>
 
-## Root Cause (preliminary)
-<initial assessment>
+## Acceptance Criteria
+- [ ] Production issue resolved
+- [ ] Regression test added
+- [ ] No new security vulnerabilities introduced
 
-## Fix Approach
-<minimal fix description>
+## Technical Approach
+**Decision:** Minimal fix — resolve immediate issue only
+**Rationale:** Production-critical, no time for full planning
+
+## Implementation Plan
+
+### Tasks
+- [ ] Investigate root cause (15-minute time-box)
+- [ ] Implement minimal fix
+- [ ] Create regression test
+- [ ] Run security check on changed files
+
+### Files to Create/Modify
+| File | Action | Purpose |
+|------|--------|---------|
+| <to be filled during investigation> | | |
 
 ## Rollback Plan
 <if fix fails, how to rollback>
 
+## Testing Strategy
+- **Unit tests:** Regression test for the specific bug
+- **Integration tests:** Affected module tests only
+- **E2E tests:** Critical path smoke tests only
+
+## Evidence (filled by tester/reviewer)
+- **Test Log:** <path>
+- **Coverage:** N/A (hotfix — deferred)
+- **Security Scan:** <status>
+- **Review Verdict:** <status>
+
 ---
 *Hotfix mode activated at <timestamp>*
+*Created by @hotfix*
 ```
 
-Save to: `agents/specs/hotfix-<num>-spec.md`
-
-### Step 2: Minimal Investigation
-
-Time-box investigation to 15 minutes max:
-```bash
-# Check recent deployments
-git log --oneline -10
-
-# Check error logs
-# (use appropriate monitoring tools)
-
-# Check recent changes to affected area
-git log --oneline --since="24 hours ago" -- src/affected/path/
-```
-
-### Step 3: Implement Fix
-
-Rules for hotfix code:
-- **Minimal change** - fix only the immediate problem
-- **No refactoring** - save for follow-up
-- **No feature additions** - focus on the fix
-- **Defensive coding** - add guards, not optimizations
-
-### Step 4: Create Regression Test
-
-Always add a test that:
-1. Reproduces the original bug
-2. Verifies the fix works
-3. Prevents regression
+### Step 2: Delegate to Executor
 
 ```typescript
-describe('HOTFIX: Issue #123', () => {
-  it('should not crash when user has null email', () => {
-    // This was crashing in production
-    const user = { id: 1, email: null };
-    expect(() => processUser(user)).not.toThrow();
-  });
-});
+task(
+  category="deep",
+  load_skills=["senior-engineer-executor", "test-generator", "security-checker"],
+  description="Hotfix <id>",
+  prompt="HOTFIX MODE. Read agents/tasks/<id>.md and PROJECT_CONTEXT.md. Time-box investigation to 15 minutes. Implement MINIMAL fix — no refactoring, no feature additions, no over-engineering. Create a regression test that reproduces the bug and verifies the fix. Run security-checker on changed files. Update task checkboxes as you complete each one. Then hand off to tester.",
+  run_in_background=false
+)
 ```
 
-### Step 5: Abbreviated Security Check
+### Step 3: Verify Pipeline Completed
 
-Run focused security scan:
-```bash
-# Scan only changed files
-npm run lint:security -- --files $(git diff --name-only HEAD~1)
+After executor → tester → reviewer chain completes, verify task file status is `READY_TO_COMMIT`.
+
+Inform the user:
+
+```
+## Hotfix Ready
+
+**Task:** <id>
+**Fix:** <one-line description>
+**Status:** READY_TO_COMMIT
+
+Run `@committer agents/tasks/<id>.md` to create the commit and PR.
 ```
 
-### Step 6: Fast Track Testing
+**DO NOT auto-commit. STOP and wait for user to invoke @committer.**
 
-Run only:
-- Tests for affected modules
-- The new regression test
-- Critical path smoke tests
+---
 
-```bash
-# Run affected tests
-npm test -- --testPathPattern="affected-module"
+### Hotfix Rules for Executor
 
-# Run smoke tests
-npm run test:smoke
-```
+- **Minimal change** — fix only the immediate problem
+- **No refactoring** — save for follow-up issue
+- **No feature additions** — focus on the fix
+- **Defensive coding** — add guards, not optimizations
+- **Regression test required** — always
 
-### Step 7: Hotfix Commit
+### Quality Gates (Abbreviated)
 
-Branch naming:
-```
-hotfix/issue-<num>-<short-desc>
-```
+**MUST pass:**
+- [ ] Regression test exists and passes
+- [ ] No new security vulnerabilities
+- [ ] Affected tests pass
+- [ ] Code compiles/builds
 
-Commit format:
-```
-fix!: <description>
+**Can be deferred:**
+- Full test suite coverage
+- Coverage threshold
+- Documentation updates
+- Deep code review
 
-HOTFIX for production issue #<num>
-
-Problem: <what was broken>
-Fix: <what was changed>
-Impact: <users affected>
-
-Closes #<num>
-```
-
-### Step 8: Expedited PR
-
-```bash
-gh pr create \
-  --title "HOTFIX: <description>" \
-  --body "## 🚨 HOTFIX
-
-**Production Issue:** #<num>
-**Severity:** Critical
-**Impact:** <description>
-
-## Fix
-<description of fix>
-
-## Testing
-- [x] Regression test added
-- [x] Affected tests pass
-- [x] Smoke tests pass
-
-## Rollback
-If issues occur:
-1. <rollback step 1>
-2. <rollback step 2>
-
-**Requires immediate review and merge.**" \
-  --label "hotfix,priority-critical" \
-  --reviewer "@team/oncall"
-```
+---
 
 ### Post-Hotfix Actions
 
 After hotfix is merged and deployed:
 
-1. **Monitor** - Watch metrics for 30 minutes
-2. **Communicate** - Update stakeholders
-3. **Document** - Update incident log
-4. **Follow-up** - Create follow-up issues for:
+1. **Monitor** — Watch metrics for 30 minutes
+2. **Communicate** — Update stakeholders
+3. **Follow-up** — Create follow-up issues for:
    - Proper fix (if hotfix was a band-aid)
    - Root cause analysis
    - Process improvements
@@ -216,7 +203,7 @@ After hotfix is merged and deployed:
 ### Follow-up Issue Template
 
 ```markdown
-## Follow-up from Hotfix #<num>
+## Follow-up from Hotfix <id>
 
 ### Original Issue
 <link to original issue>
@@ -231,81 +218,17 @@ After hotfix is merged and deployed:
 
 ### Root Cause Analysis
 To be completed within 48 hours.
-
-### Prevention
-What can we do to prevent similar issues?
 ```
-
-### Output Format
-
-```
-## Hotfix Mode Activated
-
-**Issue:** #<num>
-**Severity:** Critical
-**Status:** IN_PROGRESS
-
-### Timeline
-- Hotfix started: <timestamp>
-- Target resolution: <timestamp + 1 hour>
-
-### Progress
-- [x] Problem identified
-- [x] Fix implemented
-- [x] Regression test added
-- [ ] Testing complete
-- [ ] PR created
-- [ ] Deployed
-
-### Escalation
-If not resolved in 1 hour, escalate to: <team/person>
-```
-
-### Quality Gates (Abbreviated)
-
-Even in hotfix mode, these MUST pass:
-- [ ] Regression test exists and passes
-- [ ] No new security vulnerabilities
-- [ ] Affected tests pass
-- [ ] Code compiles/builds
-
-These can be deferred:
-- Full test suite
-- Coverage threshold
-- Documentation updates
-- Code review depth
 
 ---
 
-## PROJECT_CONTEXT Updates
+### PROJECT_CONTEXT Updates
 
-After hotfix resolution, the hotfix agent MUST update PROJECT_CONTEXT.md:
+After hotfix resolution, update PROJECT_CONTEXT.md via `lessons-writer`:
 
-| Scenario | Section to Update | When |
-|----------|-------------------|------|
-| Production bug root cause | Section 10 (Common Pitfalls) | Document the bug and prevention |
-| Hotfix workaround applied | Section 10 (Common Pitfalls) | Mark as technical debt |
-| Monitoring gap identified | Section 6 (Workflow) | Add monitoring requirements |
-| Security vulnerability found | Section 10 (Security) | Document prevention |
-
-**How to update:**
-```bash
-lessons-writer --section 10 --category "Common Pitfalls" --data '{
-  "title": "Production Crash: Null Email",
-  "symptom": "App crashed when user had null email",
-  "cause": "Missing null check in processUser",
-  "prevention": "Always validate nullable fields before processing",
-  "source": "Hotfix #42"
-}'
-```
-
-**Example:**
-```markdown
-### 2024-01-15 - Common Pitfalls: Null Email Crash
-
-**Symptom:** Application crashed in production when user had null email
-**Cause:** Missing null check in processUser function
-**Prevention:** Always validate nullable fields before processing. Add schema validation at API boundary.
-**Follow-up:** Issue #45 created for proper fix
-**Source:** Hotfix #42
-```
+| Scenario | Section to Update |
+|----------|-------------------|
+| Production bug root cause | Section 10 (Common Pitfalls) |
+| Hotfix workaround applied | Section 10 (Common Pitfalls) |
+| Monitoring gap identified | Section 6 (Workflow) |
+| Security vulnerability found | Section 10 (Security) |

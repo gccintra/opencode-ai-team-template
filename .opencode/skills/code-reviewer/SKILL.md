@@ -33,8 +33,8 @@ git diff main...HEAD
 git log --oneline main...HEAD
 ```
 
-Read the spec and plan files:
-- `agents/specs/issue-<num>-spec.md`
+Read the task and evidence files:
+- `agents/tasks/<id>.md` — unified task file with problem, approach, and evidence
 - Test logs from `agents/logs/`
 - Coverage report from `agents/logs/`
 
@@ -191,27 +191,25 @@ Gate G5 requires:
 - [ ] Code review completed
 - [ ] Security scan passed
 - [ ] No HIGH severity issues
-- [ ] All tasks in todo.md complete
+- [ ] All tasks in `agents/tasks/<id>.md` complete
 
 ---
 
-## Update Spec Status
+## Update Task File Status
 
-When approved, update the spec file:
+When approved, update the unified task file:
 
 ```markdown
-<!-- In agents/specs/issue-<num>-spec.md -->
+<!-- In agents/tasks/<id>.md -->
 ## Status: READY_TO_COMMIT
 
-## Review Summary
-- Reviewed by: @reviewer
-- Date: <timestamp>
-- Verdict: APPROVED
-
-## Evidence
-- Test Log: agents/logs/test-run-<num>-<timestamp>.md
-- Coverage: agents/logs/coverage-<num>-<timestamp>.md
-- Security: agents/logs/security-<num>-<timestamp>.md
+## Evidence (filled by tester/reviewer)
+- **Test Log:** agents/logs/test-run-<id>-<timestamp>.md
+- **Coverage:** agents/logs/coverage-<id>-<timestamp>.md
+- **Security Scan:** agents/logs/security-<id>-<timestamp>.md
+- **Review Verdict:** APPROVED
+- **Reviewed by:** @reviewer
+- **Date:** <timestamp>
 ```
 
 ---
@@ -250,12 +248,12 @@ lessons-writer --category "<category>" --lesson "<description>"
 
 ### Gate G5: PASSED
 
-### Spec Status
-Updated to: READY_TO_COMMIT
+### Task File Status
+Updated `agents/tasks/<id>.md` to: READY_TO_COMMIT
 
 ### Next Steps
 **Pronto para commit.**
-Use `@committer agents/specs/issue-<num>-spec.md` to create commit and PR.
+User can invoke `@committer` to create commit and PR.
 ```
 
 ---

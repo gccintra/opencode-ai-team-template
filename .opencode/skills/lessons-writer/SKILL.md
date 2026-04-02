@@ -9,7 +9,7 @@ description: Updates PROJECT_CONTEXT.md with lessons learned, patterns discovere
 
 ---
 
-### When to Use (ALL AGETS MUSTCALL THIS)
+### When to Use (ALL AGENTS MUST CALL THIS)
 
 **MANDATORY triggers:**
 1. After ANY correction from user or reviewer
@@ -49,7 +49,7 @@ PROJECT_CONTEXT.md has 10 sections. This skill can update:
 #### Step 1: Identify What Changed
 
 Ask yourself:
-- DidIdiscover a new pattern? → Section7 or 10
+- Did I discover a new pattern? → Section 7 or 10
 - Did conventions change? → Section 4
 - New library added? → Section 2
 - Architecture decision made? → Section 3
@@ -73,12 +73,12 @@ cat PROJECT_CONTEXT.md
 
 **For Other Sections:**
 - UPDATE existing content if conventions changed
-- APPEND ifadding new information
+- APPEND if adding new information
 - NEVER remove without explicit reason
 
 #### Step 4: Write the Update
 
-**Section10 Format (Lessons Learned):**
+**Section 10 Format (Lessons Learned):**
 
 ```markdown
 ### [Date] - [Category]: [Title]
@@ -132,7 +132,7 @@ cat PROJECT_CONTEXT.md
 ```go
 var tokenRefreshMutex sync.Mutex
 
-funcrefreshToken(userID string) (*Token, error) {
+func refreshToken(userID string) (*Token, error) {
     tokenRefreshMutex.Lock()
     defer tokenRefreshMutex.Unlock()
     // ... refresh logic
@@ -171,7 +171,7 @@ funcrefreshToken(userID string) (*Token, error) {
 - Updates Section 3 for architecture decisions
 - Updates Section 8 for new constraints
 
-#### Planner (Frontend/Backend)
+#### Executor
 - Updates Section 2 when new libraries are added
 - Updates Section 3 for pattern decisions
 
@@ -182,7 +182,7 @@ funcrefreshToken(userID string) (*Token, error) {
 
 #### Reviewer
 - Updates Section 4 for convention changes
-- Updates Section6 for workflow improvements
+- Updates Section 6 for workflow improvements
 - Updates Section 9 for principles
 - Updates Section 10 for all review findings
 
@@ -209,7 +209,7 @@ Summary: <one-line summary>
 
 ### Rules
 
-1. **ALWAYSappend to Section 10** — never delete lessons
+1. **ALWAYS append to Section 10** — never delete lessons
 2. **ALWAYS date entries** — for traceability
 3. **ALWAYS cite the source** — Issue #, PR #, or "User correction"
 4. **NEVER overwrite** without explicit reason

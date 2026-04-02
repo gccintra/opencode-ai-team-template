@@ -1,105 +1,102 @@
 ---
 name: todo-manager
-description: Manages task tracking in todo.md files, verifies completion gates, and blocks progression when tasks are incomplete.
+description: Manages task tracking in the unified task file (agents/tasks/<id>.md). Verifies completion gates and blocks progression when tasks are incomplete.
 ---
 ## Todo Manager Skill
 
-Central task tracking system for the development workflow. Manages tasks, verifies completion, and enforces gates.
+Central task tracking system for the development workflow. All tracking is done in the **unified task file** — one file per task at `agents/tasks/<id>.md`.
 
-### Files Managed
-- `agents/tasks/todo.md` - Main task list
-- `agents/tasks/frontend-todo.md` - Frontend-specific tasks
-- `agents/tasks/backend-todo.md` - Backend-specific tasks
+### File Convention
 
-### Task Format
+Each task has ONE file: `agents/tasks/<id>.md`
+
+Where `<id>` is:
+- `issue-<num>` — for GitHub issue-triggered tasks (e.g., `issue-42`)
+- `task-<slug>` — for prompt-triggered tasks (e.g., `task-add-jwt-auth`)
+
+**There are NO separate todo files.** The `### Tasks` section inside the unified task file IS the task list.
+
+### Task Format (inside the unified task file)
+
+The orchestrator creates this structure. Other agents update it.
+
 ```markdown
-## Issue #<num>: <title>
+# Task: <id> — <title>
 
-### Status: <PLANNING|IN_PROGRESS|TESTING|REVIEW|READY_TO_COMMIT|DONE>
+## Status: <PLANNING|IN_PROGRESS|TESTING|REVIEW|READY_TO_COMMIT|DONE>
+
+...
+
+## Implementation Plan
 
 ### Tasks
-- [ ] Task 1 description
-- [ ] Task 2 description
-- [x] Task 3 (completed)
+- [ ] Task 1: <description>
+- [x] Task 2: <description>  (completed)
+- [ ] Task 3: <description>
 
-### Subtasks (if needed)
-#### Frontend
-- [ ] Component implementation
-- [ ] Styling
+...
 
-#### Backend
-- [ ] API endpoint
-- [ ] Database migration
-
-### Blockers
-- <blocker description if any>
-
-### Notes
-- <relevant notes>
+## Evidence (filled by tester/reviewer)
+- **Test Log:** <path>
+- **Coverage:** <path>
+- **Security Scan:** <status>
+- **Review Verdict:** <APPROVED|CHANGES_REQUESTED>
 
 ---
-Last updated: <timestamp>
-Updated by: <agent-name>
+*Last updated: <timestamp>*
+*Updated by: <agent-name>*
 ```
 
 ### Operations
 
-#### Initialize Tasks
-When starting a new issue:
-```
-todo-manager init --issue <num> --title "<title>"
-```
-Creates the base structure in `agents/tasks/todo.md`
+#### Initialize Task File
+The orchestrator creates `agents/tasks/<id>.md` with the full structure. No separate init needed.
 
-#### Add Task
+#### Complete a Task
+Mark a checkbox in the `### Tasks` section:
+```markdown
+- [x] Task 1: <description>
 ```
-todo-manager add --task "Description" [--category frontend|backend]
-```
-
-#### Complete Task
-```
-todo-manager complete --task "Description"
-```
-Marks task as done with timestamp
+Update the `*Last updated*` footer.
 
 #### Check Status
+Count completed vs total checkboxes in `### Tasks`:
 ```
-todo-manager status --issue <num>
+Progress: [████████░░] 80% (8/10 tasks)
+Current Phase: IN_PROGRESS
 ```
-Returns completion percentage and pending tasks
 
-#### Verify Gate
+#### Update Status
+Change the `## Status:` line:
+```markdown
+## Status: IN_PROGRESS
 ```
-todo-manager gate --check <gate-name>
-```
-Returns PASS/FAIL based on gate criteria
 
 ### Gates
 
 #### G1: Orchestrator Gate
-- Spec file exists: `agents/specs/issue-<num>-spec.md`
-- Intake file exists: `agents/specs/issue-<num>-intake.md`
-- Tasks initialized in todo.md
-
-#### G2: Planner Gate
-- All planning tasks complete
-- Plan files exist (frontend-plan.md and/or backend-plan.md)
-- No blockers flagged
+- Task file exists: `agents/tasks/<id>.md`
+- Problem Statement is filled
+- Acceptance Criteria are defined
+- Tasks are listed in `### Tasks`
 
 #### G3: Executor Gate
-- All implementation tasks complete
+- All `### Tasks` checkboxes are `[x]`
 - Tests created for new code
-- No TODO comments left in code (except intentional)
+- No TODO comments left (except intentional with issue ref)
+- Security check passed
 
 #### G4: Tester Gate
 - All tests pass
-- Coverage >= 80% (or project threshold)
+- Coverage >= threshold (default 80%)
 - Test logs saved to `agents/logs/`
+- Evidence section updated in task file
 
 #### G5: Reviewer Gate
 - Code review complete
 - Security scan passed
-- Spec status = READY_TO_COMMIT
+- No HIGH severity issues
+- Status = READY_TO_COMMIT
 
 ### Status Transitions
 ```
@@ -107,13 +104,13 @@ PLANNING → IN_PROGRESS → TESTING → REVIEW → READY_TO_COMMIT → DONE
 ```
 
 Only allowed transitions:
-- PLANNING → IN_PROGRESS (when G2 passes)
-- IN_PROGRESS → TESTING (when G3 passes)
-- TESTING → IN_PROGRESS (when tests fail, return to executor)
-- TESTING → REVIEW (when G4 passes)
-- REVIEW → IN_PROGRESS (when changes requested)
-- REVIEW → READY_TO_COMMIT (when G5 passes)
-- READY_TO_COMMIT → DONE (after commit/PR created)
+- PLANNING → IN_PROGRESS (executor starts work)
+- IN_PROGRESS → TESTING (executor finishes, tester starts)
+- TESTING → IN_PROGRESS (tests fail, return to executor)
+- TESTING → REVIEW (G4 passes, reviewer starts)
+- REVIEW → IN_PROGRESS (changes requested, return to executor)
+- REVIEW → READY_TO_COMMIT (G5 passes)
+- READY_TO_COMMIT → DONE (after user runs @committer)
 
 ### Blocking Behavior
 **CRITICAL**: If a gate check fails, the workflow MUST stop.
@@ -130,40 +127,33 @@ Output format for blocked gate:
 **Return to:** <agent that should fix this>
 ```
 
-### Update Spec Status
-When changing spec status, update the spec file:
-```markdown
-<!-- In agents/specs/issue-<num>-spec.md -->
-## Status: READY_TO_COMMIT
-```
-
 ### Usage Examples
 
-**Orchestrator initializing:**
+**Orchestrator creating task file:**
 ```
-Use todo-manager to init issue #42 with title "Add user authentication"
+Create agents/tasks/issue-42.md with the full unified structure
 ```
 
-**Executor completing task:**
+**Executor completing a task:**
 ```
-Use todo-manager to complete "Implement login endpoint"
+Mark "Implement login endpoint" as done in agents/tasks/issue-42.md
 ```
 
 **Tester checking gate:**
 ```
-Use todo-manager to verify gate G4
+Verify gate G4 for agents/tasks/issue-42.md
 ```
 
 ### Output
 Always output current status after any operation:
 ```
-## Todo Status: Issue #<num>
+## Task Status: <id>
 
 Progress: [████████░░] 80% (8/10 tasks)
-Current Phase: TESTING
+Current Phase: IN_PROGRESS
 Pending Tasks:
 - [ ] Write E2E tests
 - [ ] Update documentation
 
-Gate G4: PENDING (awaiting test completion)
+Gate G3: PENDING (awaiting task completion)
 ```

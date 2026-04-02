@@ -61,7 +61,7 @@ Create minimal spec:
 ```markdown
 # HOTFIX: Issue #<num>
 
-## Status: HOTFIX_IN_PROGRESS
+## Status: IN_PROGRESS
 
 ## Problem
 <brief description of the production issue>
@@ -84,7 +84,7 @@ Create minimal spec:
 *Hotfix mode activated at <timestamp>*
 ```
 
-Save to: `agents/specs/hotfix-<num>-spec.md`
+Save to: `agents/tasks/hotfix-<num>.md`
 
 ### Step 2: Minimal Investigation
 

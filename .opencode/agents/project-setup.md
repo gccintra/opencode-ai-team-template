@@ -131,6 +131,15 @@ For each missing component, ask ONE question at a time:
 >
 > "I didn't detect a test coverage threshold. What's your minimum?" (User: "80%")
 
+**For frontend/UI projects, also ask:**
+
+> "Does this project have a Figma file? If yes, paste the Figma URL so I can extract the file key."
+> (If no Figma: leave field blank)
+>
+> "What is the primary font?" (User: "Inter")
+>
+> "Briefly describe the color palette or paste the main CSS tokens." (User: "black/white minimal" or "#111, #fff, #6366f1")
+
 ---
 
 #### Step 6: Write PROJECT_CONTEXT.md
@@ -182,11 +191,10 @@ If user passes `--quick`:
 Once PROJECT_CONTEXT.md is created:
 
 1. **All agents read it** before acting
-2. **ORCHESTRATOR** references it for architecture fit
-3. **PLANNERS** follow its conventions
-4. **EXECUTOR** writes tests according to its threshold
-5. **REVIEWER** checks against its standards
-6. **LESSONS-WRITER** appends to Section 10 when patterns are discovered
+2. **ORCHESTRATOR** references it for architecture fit and routes to the right skills
+3. **EXECUTOR** writes tests according to its threshold and uses Figma file key for UI tasks
+4. **REVIEWER** checks against its standards
+5. **LESSONS-WRITER** appends to Section 10 when patterns are discovered
 
 **PROJECT_CONTEXT.md is a living document.** Other agents update it automatically:
 - New patterns discovered → lessons-writer skill appends to Section 10
