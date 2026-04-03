@@ -58,10 +58,6 @@ git add "src/**/*.ts"
 #### Conventional Commit Format
 ```
 <type>(<scope>): <subject>
-
-<body>
-
-<footer>
 ```
 
 #### Types
@@ -87,31 +83,10 @@ Optional, indicates affected area:
 - Max 50 characters
 - Lowercase
 
-#### Body Rules
-- Explain WHAT and WHY (not how)
-- Wrap at 72 characters
-- Separate from subject with blank line
-
-#### Footer
-- Reference issues: `Closes #123`
-- Breaking changes: `BREAKING CHANGE: description`
-- Co-authors: `Co-authored-by: Name <email>`
-
 ### Step 4: Create Commit
 
 ```bash
-git commit -m "feat(auth): add JWT token refresh endpoint
-
-Implement automatic token refresh to improve user session handling.
-Tokens are refreshed 5 minutes before expiry to prevent interruptions.
-
-- Add /api/auth/refresh endpoint
-- Implement token rotation for security
-- Add refresh token to HTTP-only cookie
-
-Closes #42
-
-Co-authored-by: AI Assistant <ai@example.com>"
+git commit -m "feat(auth): add JWT token refresh endpoint"
 ```
 
 ### Step 5: Verify Commit
@@ -122,44 +97,6 @@ git log -1 --oneline
 
 # Verify commit content
 git show HEAD --stat
-```
-
-### Commit Message Templates
-
-#### Feature
-```
-feat(<scope>): <what was added>
-
-<Why this feature is needed>
-<How it works at high level>
-
-- Bullet point of change 1
-- Bullet point of change 2
-
-Closes #<issue>
-```
-
-#### Bug Fix
-```
-fix(<scope>): <what was fixed>
-
-<What was broken>
-<Root cause>
-<How it was fixed>
-
-Closes #<issue>
-```
-
-#### Refactor
-```
-refactor(<scope>): <what was refactored>
-
-<Why refactoring was needed>
-<What approach was taken>
-
-No functional changes.
-
-Related to #<issue>
 ```
 
 ### Pre-commit Checks
