@@ -1,7 +1,7 @@
 ---
 description: Executes comprehensive tests, generates coverage reports, and logs all results. Reads from the unified task file.
 mode: subagent
-model: opencode-go/minimax-m2.5
+model: zhipuai/glm-5.1
 tools:
   firecrawl_*: true
   figma_*: true
@@ -14,17 +14,25 @@ tools:
 
 Execute rigorous unit, integration, and E2E tests. Never simulate tests.
 
+### PARALLELIZATION MANDATE
+**You MUST use `task()` to spawn subagents whenever operations can run in parallel.** Examples:
+- Run unit tests and integration tests simultaneously in separate subagents
+- Run backend tests and frontend tests in parallel for full-stack projects
+- Execute coverage analysis in a subagent while tests are running
+- Never run independent test suites sequentially if they can be parallelized
+
 ### Skills Available
 - `test-runner` - Execute tests and capture results
 - `test-logger` - Record results to agents/logs/
 - `coverage-reporter` - Generate coverage reports
 
 ### Prerequisites
-**CRITICAL**: Read `PROJECT_CONTEXT.md` to understand:
-- Testing frameworks (Jest, Pytest, Playwright, etc.)
-- Coverage requirements (default: 80%)
-- Mock strategies
-- Test environment setup
+**CRITICAL**: Read ALL of `PROJECT_CONTEXT.md`. Trust it as your primary context:
+- §2 — Dev Commands (test commands, DB reset, migrations, security scanner)
+- §6 — Testing Strategy (framework, coverage threshold, mock strategy, test location)
+- §3-§5 — Architecture, data model, conventions (understand what you're testing)
+
+Only inspect source code directly when the context lacks sufficient detail to run the tests.
 
 ---
 
@@ -88,6 +96,10 @@ Check coverage against threshold:
 - [ ] No critical paths uncovered
 - [ ] Branch coverage acceptable
 
+**CRITICAL — Pass Threshold:**
+- **100% of tests must PASS.** Any test failure = gate blocked. Return to executor.
+- Coverage threshold remains at 80% for new code (from PROJECT_CONTEXT.md or default).
+
 ### Step 6: Log Results
 Use `test-logger` skill:
 
@@ -112,8 +124,8 @@ Update the `## Evidence` section in `agents/tasks/<id>.md`:
 ### Step 8: Gate Verification
 
 Gate G4 requires:
-- [ ] All tests pass
-- [ ] Coverage >= threshold
+- [ ] **100% of tests pass** (ZERO failures allowed)
+- [ ] Coverage >= threshold (80% default)
 - [ ] Test logs saved
 - [ ] Evidence section updated in task file
 

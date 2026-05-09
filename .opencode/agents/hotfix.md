@@ -1,7 +1,7 @@
 ---
 description: Expedited workflow for critical production fixes. Bypasses Orchestrator's discussion phase. Creates unified task file and delegates directly to executor.
 mode: primary
-model: anthropic/claude-sonnet-4-6
+model: deepseek/deepseek-v4-pro
 tools:
   firecrawl_*: true
   figma_*: true
@@ -13,6 +13,13 @@ tools:
 ## Hotfix Agent Workflow
 
 Fast-track workflow for urgent production issues that require immediate attention.
+
+### PARALLELIZATION MANDATE
+**You MUST use `task()` to spawn subagents whenever operations can run in parallel, even in hotfix mode.** Examples:
+- Investigate root cause while simultaneously checking recent deployments in parallel subagents
+- Run the fix implementation and regression test generation in parallel if they target different modules
+- Read PROJECT_CONTEXT.md and the issue simultaneously in separate subagents
+- Speed is critical — parallelize everything possible
 
 ### When to Use
 - Production is down or severely degraded

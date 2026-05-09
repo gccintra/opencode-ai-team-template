@@ -1,128 +1,108 @@
-# Project Context: [Project Name]
+# Project Context — [Project Name]
 
-> **Note to AI Agents:** This document is the single source of truth for architecture, technology stack, and code constraints for this project. Every specification, planning, and implementation MUST align with the rules defined here.
+> **Last Updated:** [date] | **Maintained By:** [team/person]
+> **Architecture:** [Clean Architecture / Hexagonal / Layered / Microservices / Modular Monolith]
 
 ---
 
 ## 1. Project Overview
 
-* **Description:** [Explain in 1-2 sentences what the system does. Ex: An ERP system focused on inventory management for small stores.]
+[2-3 sentences: what it does, who it's for, core value proposition]
 
-* **Primary Objective:** [What main pain point does it solve? Ex: Eliminate manual spreadsheets and automate out-of-stock alerts.]
+**Primary Objective:** [What main pain point does it solve?]
 
-* **Target Audience:** [Who will use it? Ex: Store managers with limited technical knowledge.]
+**Target Audience:** [Who will use it?]
 
-* **Key Features:**
-  - [Feature 1]
-  - [Feature 2]
-  - [Feature 3]
+**Key Features:**
+- [Feature 1]
+- [Feature 2]
+- [Feature 3]
 
 ---
 
-## 2. Technology Stack
+## 2. Technology Stack — Dev Commands
 
-### Frontend
-* **Framework:** [Ex: React 18, Next.js 14 with App Router]
-* **State Management:** [Ex: Zustand, Redux, Context API, TanStack Query]
-* **Styling:** [Ex: TailwindCSS, CSS Modules, Styled Components]
-* **UI Components:** [Ex: Shadcn/ui, Material-UI, Ant Design]
-* **Build Tool:** [Ex: Vite, Webpack, esbuild]
-* **Testing:** [Ex: Jest, Vitest, Playwright for E2E]
-* **Package Manager:** [Ex: npm, yarn, pnpm]
+### Stack
 
-### Backend
-* **Language & Runtime:** [Ex: Python 3.12, Node.js 20, Go 1.21]
-* **Framework:** [Ex: FastAPI, Express, Django, Gin]
-* **API Style:** [Ex: REST, GraphQL, gRPC]
-* **Validation:** [Ex: Pydantic, Joi, zod]
-* **ORM/Query:** [Ex: SQLAlchemy, Prisma, sqlc]
-* **Testing:** [Ex: Pytest, Jest, Go testing]
-* **Package Manager:** [Ex: pip, npm, go mod]
-
-### Database
-* **Primary DB:** [Ex: PostgreSQL 15, MongoDB 6, MySQL 8]
-* **Caching:** [Ex: Redis 7, Memcached]
-* **Search:** [Ex: Elasticsearch, Meilisearch]
-* **Migrations:** [Ex: Alembic, Knex, Migrate]
+| Layer | Technology |
+|-------|-----------|
+| Frontend | [React 19 / Vue 3 / Next.js 14 / Not applicable] |
+| Build Tool | [Vite / Webpack / esbuild] |
+| CSS | [TailwindCSS / CSS Modules / Styled Components] |
+| State Management | [Zustand / Redux / React Query / Pinia] |
+| Backend | [Go 1.24 / Python 3.13 / Node.js 22 / Not applicable] |
+| API Style | [REST / GraphQL / gRPC] |
+| Database | [PostgreSQL 16 / MySQL 8 / MongoDB 7] |
+| ORM | [Prisma / GORM / SQLAlchemy / sqlc] |
+| Cache | [Redis / None] |
+| Auth | [JWT / OAuth2 / Session / API Keys / None] |
+| Package Manager | [npm / yarn / pnpm / pip / go modules] |
+| Linter | [ESLint / Ruff / golangci-lint] |
+| Formatter | [Prettier / Black / gofmt] |
 
 ### Dev Commands
-*(Fill these in so agents know exactly which commands to run)*
 
 **Backend:**
-* **Test Command:** [Ex: `go test ./...`, `pytest`, `npm test`]
-* **Coverage Command:** [Ex: `go test -coverprofile=coverage.out ./...`, `pytest --cov`, `npx vitest run --coverage`]
-* **Lint Command:** [Ex: `golangci-lint run`, `ruff check .`, `npm run lint`]
-* **Security Scanner:** [Ex: `gosec ./...`, `bandit -r src/`, `npm audit`]
+
+| Command | Description |
+|---------|------------|
+| `[dev-server-cmd]` | Start dev server |
+| `[test-cmd]` | Run unit + integration tests |
+| `[coverage-cmd]` | Run tests with coverage |
+| `[lint-cmd]` | Lint code |
+| `[typecheck-cmd]` | Type-check (or N/A) |
+| `[build-cmd]` | Build for production |
+| `[security-cmd]` | Security scan (or N/A) |
 
 **Frontend (if applicable):**
-* **Test Command:** [Ex: `npx vitest run`, `npm test`]
-* **E2E Command:** [Ex: `npx playwright test`, `cypress run`]
-* **Coverage Command:** [Ex: `npx vitest run --coverage`]
 
-**Database:**
-* **Migration Tool:** [Ex: `golang-migrate`, `alembic`, `knex`, `prisma migrate`]
-* **Run Migrations:** [Ex: `migrate -path db/migrations -database $DATABASE_URL up`]
-* **Test DB Reset:** [Ex: `psql -U $DB_USER -c "DROP DATABASE IF EXISTS ${DB_NAME}_test..."`, or N/A]
+| Command | Description |
+|---------|------------|
+| `[dev-server-cmd]` | Start dev server |
+| `[test-cmd]` | Run unit tests |
+| `[e2e-cmd]` | Run E2E tests (or N/A) |
+| `[coverage-cmd]` | Run tests with coverage |
+| `[lint-cmd]` | Lint code |
+| `[typecheck-cmd]` | Type-check |
+| `[build-cmd]` | Build for production |
+
+**Test DB Management:**
+
+| Command | Description |
+|---------|------------|
+| `[db-reset-cmd]` | Reset test database (or N/A) |
+| `[migrate-cmd]` | Run database migrations (or N/A) |
 
 ### DB Access (Docker)
-* **DB Container:** [Ex: myapp-postgres]
-* **DB User:** [Ex: postgres]
-* **DB Name:** [Ex: myapp_dev]
-* **DB Access Command:** `docker exec -i <container> psql -U <user> -d <db> -c "<query>"`
 
-### Infrastructure & DevOps
-* **Hosting:** [Ex: AWS, Google Cloud, Azure, Vercel]
-* **Container:** [Ex: Docker, Podman]
-* **Orchestration:** [Ex: Kubernetes, Docker Compose]
-* **CI/CD:** [Ex: GitHub Actions, GitLab CI, Jenkins]
-* **Observability:** [Ex: Datadog, New Relic, CloudWatch]
-
-### External Services
-* **Authentication:** [Ex: Auth0, Firebase, Clerk, Cognito]
-* **Payments:** [Ex: Stripe, PayPal]
-* **Email:** [Ex: SendGrid, AWS SES]
-* **File Storage:** [Ex: AWS S3, Google Cloud Storage]
-* **Analytics:** [Ex: Segment, Mixpanel, Amplitude]
-
-### Design & Figma
-*(Used by html-to-figma and figma-implement-design skills)*
-* **Figma File Key:** [Ex: `ubx8p2dAGtO3cmhfUEJkCu` — extracted from figma.com/design/:fileKey/...]
-* **Figma File URL:** [Ex: https://www.figma.com/design/ubx8p2dAGtO3cmhfUEJkCu/ProjectName]
-* **Design Tokens:** [Ex: CSS custom properties in src/styles/tokens.css, or Tailwind config]
-* **Primary Font:** [Ex: Inter, Geist, DM Sans]
-* **Color Palette:** [Ex: --color-primary: #111, --color-accent: #6366f1]
-* **Icon Library:** [Ex: Lucide, Heroicons, Phosphor — or "from Figma assets only"]
-* **Component Library:** [Ex: Shadcn/ui, Radix, or "custom only"]
+- **DB Container:** [container-name]
+- **DB User:** [user]
+- **DB Name:** [db-name]
+- **Access Command:** `docker exec -i <container> psql -U <user> -d <db> -c "<query>"`
 
 ---
 
-## 3. Architecture and Design Patterns
+## 3. Architecture
 
-### Overall Architecture Pattern
-[Ex: Clean Architecture / Hexagonal / CQRS / Microservices]
+**Pattern:** [Clean Architecture / Hexagonal / Layered (MVC) / Microservices / Modular Monolith]
 
-**Justification:**
-[Why this pattern was chosen for this project]
+**Justification:** [Why this pattern was chosen]
 
 ### Layer Structure
 
-**Frontend Architecture:**
-* [Component structure - feature-sliced, atomic design, etc.]
-* [State management boundaries - local vs global]
-* [Data fetching patterns - React Query, SWR, etc.]
+**Backend:**
+- **Domain Layer:** [Business logic, entities, value objects]
+- **Application Layer:** [Use cases, services, DTOs]
+- **Infrastructure Layer:** [Database, external APIs, caching]
+- **Presentation Layer:** [Controllers, routes, HTTP handlers]
 
-**Backend Architecture:**
-* **Domain Layer:** [Business logic, entities, value objects]
-* **Application Layer:** [Use cases, services, DTOs]
-* **Infrastructure Layer:** [Database, external APIs, caching]
-* **Presentation Layer:** [Controllers, routes, HTTP handlers]
-
-### Data Flow
-```
-[Diagram or description of data flow from UI to database and back]
-```
+**Frontend (if applicable):**
+- [Component structure — feature-sliced, atomic design, etc.]
+- [State management boundaries — local vs global]
+- [Data fetching patterns]
 
 ### Module Organization
+
 ```
 src/
 ├── domain/           # Business logic (independent of framework)
@@ -132,76 +112,110 @@ src/
 └── shared/           # Common utilities, types
 ```
 
+### API Conventions
+
+**Success Response:**
+```json
+{
+  "data": { ... },
+  "error": null
+}
+```
+
+**Error Response:**
+```json
+{
+  "data": null,
+  "error": "error_code",
+  "message": "Human readable description"
+}
+```
+
+**Conventions:**
+- Rate Limiting: [100 req/min per IP or N/A]
+- Pagination: [cursor-based / offset, 50 per page]
+- Versioning: [URL /api/v1/ or Header]
+
 ---
 
-## 4. Coding Standards and Conventions
+## 4. Data Model
 
-### Language-Specific Standards
+**Core Entities:**
+
+| Entity | Key Fields | Relationships |
+|--------|-----------|---------------|
+| [Entity 1] | [field1, field2, field3] | [belongs to X, has many Y] |
+| [Entity 2] | [field1, field2, field3] | [belongs to X] |
+| [Entity 3] | [field1, field2, field3] | [has many Y] |
+
+**Naming Conventions:**
+- Tables: `snake_case` plural
+- Columns: `snake_case`
+- Foreign Keys: `<table>_id`
+- Timestamps: `created_at`, `updated_at`
+
+**Database Rules:**
+- All tables have `id` as primary key
+- Index foreign keys and frequently queried columns
+- Every schema change requires a migration
+- Use transactions for multi-step operations
+
+---
+
+## 5. Coding Standards & Conventions
+
+### Language-Specific
 
 **JavaScript/TypeScript:**
-* **Linting:** [Ex: ESLint with strict config]
-* **Formatting:** [Ex: Prettier, 2 spaces]
-* **Type Checking:** [Ex: TypeScript strict mode]
-* **Naming:** `camelCase` for variables/functions, `PascalCase` for classes/components
-* **File Structure:** [Ex: index.ts exports, barrel pattern]
+- Linting: [ESLint + strict config]
+- Formatting: [Prettier, 2 spaces]
+- Type Checking: [TypeScript strict mode]
+- Naming: `camelCase` variables/functions, `PascalCase` classes/components
+- Imports: [standard / alphabetical / grouped by type]
 
 **Python:**
-* **Linting:** [Ex: Ruff, Black formatting]
-* **Type Hints:** [Ex: Mandatory type hints on all functions]
-* **Naming:** `snake_case` for functions/variables, `PascalCase` for classes
-* **Code Style:** [Ex: PEP 8 + custom rules]
+- Linting: [Ruff]
+- Formatting: [Black]
+- Type Hints: [mandatory on all functions]
+- Naming: `snake_case` functions/variables, `PascalCase` classes
 
 **Go:**
-* **Linting:** [Ex: golangci-lint, gofmt]
-* **Error Handling:** [Ex: Explicit error returns, no panic in production code]
-* **Naming:** [Ex: MixedCase for exported, lowercase for unexported]
-* **Concurrency:** [Ex: Context propagation, goroutine management with sync or errgroup]
+- Linting: [golangci-lint]
+- Formatting: [gofmt]
+- Error Handling: [explicit returns, no panic in production]
+- Naming: MixedCase exported, lowercase unexported
 
 ### Universal Rules
 
-#### Error Handling
-* Never silently swallow errors (no `try/catch pass` or `_ = err`)
-* Create detailed error messages that indicate what failed and why
-* Return appropriate HTTP status codes (400, 401, 403, 404, 500)
-* Log errors with full context (user, operation, timestamp)
+**Error Handling:**
+- Never silently swallow errors
+- Return appropriate HTTP status codes (400, 401, 403, 404, 500)
+- Log errors with context (user, operation, timestamp)
 
-#### Code Organization
-* **KISS (Keep It Simple, Stupid)** - Avoid over-engineering
-* **DRY (Don't Repeat Yourself)** - Extract common patterns, but don't create premature abstractions
-* **SOLID Principles** - Single responsibility, Open/closed, etc.
-* **No magic numbers** - Use named constants
-* **Clear naming** - Variable/function names should be self-documenting
+**Code Organization:**
+- KISS — avoid over-engineering
+- DRY — extract patterns, don't create premature abstractions
+- No magic numbers — use named constants
+- Clear, self-documenting names
 
-#### Comments
-* Comments explain WHY, not WHAT (code shows what)
-* Add comments for non-obvious logic or business rules
-* Keep comments in sync with code
-* No commented-out code in final commits
+**Comments:**
+- Explain WHY, not WHAT
+- No commented-out code in commits
 
-#### Testing Standards
-* **Coverage:** Minimum 80% for new code
-* **Types:** Unit, integration, and E2E tests
-* **Naming:** Test names describe what they test (e.g., `should_return_404_when_user_not_found`)
-* **Isolation:** Tests should not depend on each other
-* **Mocking:** Mock external dependencies in unit tests
+**Security:**
+- Input validation on all user inputs
+- Parameterized queries (no SQL injection)
+- Output encoding (XSS prevention)
+- Never commit secrets — use environment variables
+- CORS configured explicitly
 
-#### Security
-* **Input Validation:** All user inputs must be validated
-* **SQL Injection:** Always use parameterized queries
-* **XSS Prevention:** Escape/encode output
-* **CORS:** Configure explicitly
-* **Secrets:** Never commit to git, use environment variables
-* **Auth:** Implement proper authentication and authorization
+**Performance:**
+- Avoid N+1 queries — use indexes
+- Lazy load images, code split frontend
+- Cache appropriately
 
-#### Performance
-* **Database:** Avoid N+1 queries, use indexes
-* **Frontend:** Lazy load images, code split, minimize bundle
-* **Caching:** Cache appropriately (avoid over-caching)
-* **Monitoring:** Track key metrics (response time, error rate)
+### Commit Convention
 
-### Commit Message Convention
-
-**Format:**
 ```
 <type>(<scope>): <subject>
 
@@ -210,161 +224,89 @@ src/
 <footer>
 ```
 
-**Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`
+Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`
 
-**Example:**
-```
-feat(auth): add JWT token refresh endpoint
-
-Implement automatic token refresh to improve user session handling.
-Tokens are refreshed 5 minutes before expiry.
-
-- Add /api/auth/refresh endpoint
-- Implement token rotation
-- Add refresh token to HTTP-only cookie
-
-Closes #42
-```
+**Branch Naming:** `<type>/<id>-<short-desc>`
 
 ---
 
-## 5. Feature-Specific Guidelines
+## 6. Testing Strategy
 
-### Frontend Features
-* **Responsive Design:** Mobile-first approach, support [list breakpoints]
-* **Accessibility:** WCAG 2.1 AA standards minimum
-  - Color contrast 4.5:1 for text
-  - Keyboard navigation
-  - Screen reader support
-  - Focus management
-* **Performance Budget:** [Ex: LCP < 2.5s, CLS < 0.1]
-* **Browser Support:** [Ex: Chrome, Firefox, Safari (last 2 versions)]
+| Aspect | Value |
+|--------|-------|
+| Framework | [Jest / Vitest / PyTest / Go Test] |
+| E2E Tool | [Playwright / Cypress / N/A] |
+| Coverage Threshold | [80%] |
+| Test File Convention | `*.test.ts` / `test_*.py` / `*_test.go` |
+| Test Location | [next to source / `__tests__/` / separate `tests/` dir] |
+| Mock Strategy | [mock at service boundaries / use test doubles] |
+| Pre-commit/PR | [tests must pass before merge? yes/no] |
 
-### Backend APIs
-* **Response Format:**
-  ```json
-  {
-    "data": {...},
-    "error": null,
-    "message": "Optional success message"
-  }
-  ```
-* **Error Format:**
-  ```json
-  {
-    "data": null,
-    "error": "error_code",
-    "message": "Human readable message"
-  }
-  ```
-* **Rate Limiting:** [Ex: 100 requests per minute per IP]
-* **Pagination:** [Ex: Cursor-based, 50 items per page]
-* **Versioning:** [Ex: URL versioning /api/v1/, Header versioning]
-
-### Database
-* **Naming:** [Ex: snake_case for tables and columns]
-* **Indexes:** Index foreign keys and frequently queried columns
-* **Constraints:** Use NOT NULL, UNIQUE, FK constraints
-* **Migrations:** Every schema change requires a migration
-* **Transactions:** Use for multi-step operations affecting consistency
-
-### Testing Approach
+### Test Types
 
 **Unit Tests:**
-* Test business logic in isolation
-* Mock all external dependencies
-* Focus on edge cases and error conditions
-* Table-driven tests for multiple scenarios
+- Test business logic in isolation
+- Mock all external dependencies
+- Focus on edge cases and error conditions
 
 **Integration Tests:**
-* Test API endpoints with database
-* Use test database or containers
-* Verify data flow end-to-end
-* Test error scenarios
+- Test API endpoints with database
+- Use test database or containers
+- Verify data flow end-to-end
 
-**E2E Tests:**
-* Critical user flows only
-* Happy path and error scenarios
-* Test in staging environment before production
+**E2E Tests (if applicable):**
+- Critical user flows only
+- Happy path and error scenarios
 
 ---
 
-## 6. Development Workflow Rules
+## 7. Authentication & Security
 
-### Before Implementation
-1. Read `PROJECT_CONTEXT.md` completely
-2. Understand the spec and design
-3. Verify no contradictions with architecture
-
-### During Implementation
-1. Follow coding standards defined above
-2. Write tests alongside code (not after)
-3. Run linters and formatters
-4. Commit frequently with clear messages
-5. Document non-obvious decisions
-
-### Frontend / UI Tasks
-* Every new screen or UI component destined for Figma → use `html-to-figma` skill
-* Target Figma file is defined in **Section 2 → Design & Figma → Figma File Key**
-* Implementing an existing Figma design into code → use `figma-implement-design` skill
-* All HTML/CSS must use CSS custom properties (design tokens), flexbox/grid auto layout, semantic HTML5, and WCAG AA accessibility
-
-### Database Tasks
-* Every schema change → use `db-migrator` skill
-* Always write rollback (down) migration alongside up migration
-
-### Quality Gates
-1. **Code Quality:** Must pass linting and formatting
-2. **Tests:** Must pass all tests, 80%+ coverage
-3. **Security:** Must pass security scan, no hardcoded secrets
-4. **Architecture:** Must follow patterns defined above
-5. **Documentation:** Updated if needed (README, comments)
+| Aspect | Value |
+|--------|-------|
+| Auth Method | [JWT / OAuth2 / Session / API Keys / None] |
+| Token Storage | [HTTP-only cookie / localStorage / Authorization header] |
+| Token Expiry | [15 min access / 7 day refresh] |
+| Security Scanner | [gosec / bandit / npm audit / N/A] |
+| Secrets Management | [.env file / HashiCorp Vault / cloud secrets manager] |
+| CORS | [configured / not applicable] |
+| Rate Limiting | [100 req/min per IP / N/A] |
 
 ---
 
-## 7. Common Patterns and Examples
+## 8. Styling & Design (UI Projects)
 
-### API Endpoint Pattern
-[Show example of a typical GET/POST/PUT/DELETE endpoint following your conventions]
+| Aspect | Value |
+|--------|-------|
+| Figma File Key | [key — extracted from `figma.com/design/:key/...`] |
+| Figma File URL | [full URL or N/A] |
+| Primary Font | [Inter / Geist / DM Sans / System default] |
+| Color Palette | [e.g., `--primary: #111`, `--accent: #6366f1`] |
+| Icon Library | [Lucide / Heroicons / Phosphor / from Figma] |
+| Component Library | [Shadcn/ui / Radix / custom only] |
+| Design Tokens | [CSS custom properties / Tailwind config / separate file] |
 
-### Service/Use Case Pattern
-[Show example of a service class or use case implementation]
+**Accessibility:** WCAG 2.1 AA minimum — color contrast 4.5:1, keyboard navigation, screen reader support, focus management.
 
-### Component Pattern
-[Show example of a frontend component following your conventions]
-
-### Database Query Pattern
-[Show example of a query following your conventions]
-
-### Error Handling Pattern
-[Show how errors should be handled]
-
-### Testing Pattern
-[Show example test structure]
+**Browser Support:** [Chrome, Firefox, Safari — last 2 versions]
 
 ---
 
-## 8. Project-Specific Rules
+## 9. External Dependencies & Integrations
 
-[Add any project-specific rules or constraints that don't fit above categories]
+| Service | Purpose | Auth / Config |
+|---------|---------|---------------|
+| [Service 1] | [What it does] | [API key / OAuth / env var] |
+| [Service 2] | [What it does] | [API key / OAuth / env var] |
 
-* Rule 1: [Ex: All dates must be UTC]
-* Rule 2: [Ex: Feature flags required for new features]
-* Rule 3: [Ex: Database backups required before deployments]
-
----
-
-## 9. When in Doubt
-
-1. **Code is read more often than written** - Optimize for clarity
-2. **Simple is better than clever** - Don't over-engineer
-3. **Ask the team** - Check PROJECT_CONTEXT.md, issues, or previous implementations
-4. **Write tests** - Tests clarify intent and catch bugs early
-5. **Follow existing patterns** - Stay consistent with codebase
+Use `N/A` if no external integrations.
 
 ---
 
-## 10. Lessons Learned
+## 10. Common Pitfalls & Lessons Learned
+
+> _This section is filled automatically by the `lessons-writer` skill as agents work on the project._
+> _Patterns, bugs, performance insights, and security considerations are appended here during development._
 
 ### Architecture Patterns
 
@@ -390,11 +332,6 @@ Closes #42
 
 <!-- Add tips for specific tools/libraries -->
 
-### Design & UI
-
-<!-- Add UI/Figma patterns, design token decisions, and component conventions discovered during development -->
-
 ---
 
-**Last Updated:** [date]
-**Maintained By:** [team/person]
+*Created by @project-setup on [date]*

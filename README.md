@@ -1,370 +1,481 @@
 # OpenCode AI Team Template
 
-A production-ready template for orchestrating a team of specialized AI agents that collaborates to deliver features end-to-end — from requirements to Pull Request — with automated planning, implementation, testing, security checks, and code review.
+A production-ready template for orchestrating a team of 12 specialized AI agents that collaborate to deliver features end-to-end — from product discovery to Pull Request — with five distinct workflows, mandatory parallelization, automated testing, security checks, and code review.
 
 ---
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Full Workflow](#full-workflow)
+- [Architecture & Workflows](#architecture--workflows)
+- [Agent Team](#agent-team)
 - [Quick Start](#quick-start)
-- [Agents](#agents)
+- [Solo Agents (Foundation & Operations)](#solo-agents-foundation--operations)
+  - [project-setup](#project-setup)
+  - [product-manager](#product-manager)
+  - [issue-crafter](#issue-crafter)
+  - [designer](#designer)
+  - [committer](#committer)
+- [Multi Agents (Development Pipeline)](#multi-agents-development-pipeline)
+  - [plan-maker](#plan-maker)
+  - [orchestrator-tdd](#orchestrator-tdd)
+  - [orchestrator-nontdd](#orchestrator-nontdd)
+  - [hotfix](#hotfix)
+  - [executor-tdd](#executor-tdd)
+  - [executor](#executor)
+  - [tester](#tester)
+  - [reviewer](#reviewer)
 - [Quality Gates](#quality-gates)
 - [GitHub Issues & Labels Standard](#github-issues--labels-standard)
 - [Skills Reference](#skills-reference)
 - [File Structure](#file-structure)
+- [Parallelization Model](#parallelization-model)
 - [Configuration](#configuration)
   - [Environment Variables](#environment-variables)
-- [Hotfix Flow](#hotfix-flow)
 - [Customization](#customization)
 - [Troubleshooting](#troubleshooting)
 
 ---
 
-## Overview
+## Architecture & Workflows
 
-This template gives you a complete AI engineering team operating inside [OpenCode](https://opencode.ai). Each agent has a specific role, a defined model, and strict quality gates that prevent the workflow from advancing until requirements are met.
+This template provides **5 distinct workflows** covering the full development lifecycle:
 
-**The team:**
+### Flow 1: Product Discovery → Issue (Solo)
 
-| Agent | Role | Model | Mode |
-|-------|------|-------|------|
-| `project-setup` | Entry point for new projects — analyzes codebase, discusses architecture, creates PROJECT_CONTEXT.md | claude-sonnet-4-6 | primary |
-| `issue-crafter` | Discusses requirements and creates GitHub issues | claude-sonnet-4-6 | primary |
-| `orchestrator` | Reads issues or prompts, discusses approach, plans everything, routes to executor | gemini-3-pro | primary |
-| `executor` | Implements code with mandatory tests and security checks | claude-sonnet-4-6 | subagent |
-| `tester` | Runs tests, generates coverage reports, logs results | minimax-m2.5 | subagent |
-| `reviewer` | Code review, final security scan, marks READY_TO_COMMIT | minimax-m2.5 | subagent |
-| `committer` | Creates commit, pushes branch, opens PR (manual trigger only) | minimax-m2.5 | subagent |
-| `hotfix` | Emergency bypass flow for critical production issues | claude-sonnet-4-6 | primary |
+```
+@product-manager  →  (discuss scope, UX, business rules)
+       │
+       ├─ Generates doc (Feature Brief or Project Brief)
+       ├─ Outputs: "Copy-paste ready" command with doc path
+       │
+       └─ MANDATORY: offer to generate document → STOP
+              ↓
+@issue-crafter docs/feature-brief-<name>.md   →  (reads doc, skips discovery)
+       │
+       ├─ "I read the Feature Brief. Let me draft the issue based on this."
+       ├─ Drafts issue using doc as source of truth
+       ├─ Asks only about gaps (if any)
+       │
+       └─ Creates GitHub issue → STOP
+              ↓
+@orchestrator-tdd #N   OR   @orchestrator-nontdd #N
+```
+
+**The link is semi-automatic:**
+1. `product-manager` outputs the exact command to copy-paste
+2. `issue-crafter` auto-discovers the doc (even if you forget to pass the path)
+3. If a doc is found, Discovery phase is skipped — no re-discussing what was already decided
+
+### Flow 2: TDD Pipeline (Tests First)
+
+```
+@orchestrator-tdd #N
+  │
+  ├─ Read PROJECT_CONTEXT.md + issue
+  ├─ Discuss technical approach with user
+  ├─ Create agents/tasks/<id>.md
+  ├─ Gate G1: Plan validated
+  │
+  └─ task(executor-tdd) ──────────── RED PHASE
+       │
+       ├─ Infer test framework from PROJECT_CONTEXT.md
+       ├─ Write ONLY failing tests (mocks/stubs/interfaces)
+       ├─ Update task checkboxes for test tasks
+       │
+       └─ task(executor) ──────────── GREEN PHASE
+            │
+            ├─ Implement code to pass ALL existing tests
+            ├─ Do NOT modify tests (unless genuine error)
+            ├─ Add tests for untested edge cases only
+            ├─ Run security-checker
+            ├─ Gate G3: Implementation & security verified
+            │
+            └─ task(tester)
+                 │
+                 ├─ 100% pass? ──YES──→ task(reviewer)
+                 │                     │
+                 │                     ├─ quick-review + security-checker
+                 │                     ├─ lessons-writer
+                 │                     ├─ APPROVED → READY_TO_COMMIT → STOP (notify user)
+                 │                     └─ CHANGES → task(executor) [loop]
+                 │
+                 └─ fail? ──→ task(executor) [loop]
+```
+
+### Flow 3: Standard Pipeline (Code + Tests Together)
+
+```
+@orchestrator-nontdd #N
+  │
+  ├─ Read PROJECT_CONTEXT.md + issue
+  ├─ Discuss technical approach with user
+  ├─ Create agents/tasks/<id>.md
+  ├─ Gate G1: Plan validated
+  │
+  └─ task(executor) ──────────── IMPLEMENT + TEST
+       │
+       ├─ Implement all tasks from plan
+       ├─ Generate tests via test-generator
+       ├─ Run security-checker
+       ├─ Gate G3: Implementation & security verified
+       │
+       └─ task(tester) → task(reviewer) → [same as TDD flow]
+```
+
+### Flow 4: Hotfix (Emergency Bypass)
+
+```
+@hotfix #N
+  │
+  ├─ Create agents/tasks/<id>.md (minimal hotfix template)
+  │
+  └─ task(executor)
+       │
+       ├─ 15-minute investigation time-box
+       ├─ Minimal fix + regression test
+       ├─ Abbreviated security check
+       │
+       └─ task(tester) → task(reviewer) → READY_TO_COMMIT
+```
+
+### Flow 5: Standalone Planning (No Execution)
+
+```
+@plan-maker #N
+  │
+  ├─ Read PROJECT_CONTEXT.md + issue
+  ├─ Discuss technical approach with user
+  ├─ Create agents/tasks/<id>.md
+  ├─ Gate G1: Plan validated
+  │
+  └─ STOP (user decides next step manually)
+```
+
+### Status Lifecycle
+
+```
+PLANNING → IN_PROGRESS → TESTING → REVIEW → READY_TO_COMMIT → DONE
+```
 
 ---
 
-## Full Workflow
+## Agent Team
 
-### Entry Points
+| # | Agent | Mode | Role | Model |
+|---|-------|------|------|-------|
+| 1 | `project-setup` | primary | Architecture & PROJECT_CONTEXT.md | claude-sonnet-4-6 |
+| 2 | `product-manager` | primary | Product, UX, scope, business rules | kimi-k2.6 |
+| 3 | `issue-crafter` | primary | Standardized GitHub issues (REQ + TECH) | claude-sonnet-4-6 |
+| 4 | `designer` | primary | Requirements → design system → HTML → Figma | claude-sonnet-4-6 |
+| 5 | `plan-maker` | primary | Detailed plan in .md, STOPS (no execution) | deepseek-v4-pro |
+| 6 | `orchestrator-tdd` | primary | Plan + delegate to executor-tdd | deepseek-v4-pro |
+| 7 | `orchestrator-nontdd` | primary | Plan + delegate to executor | deepseek-v4-pro |
+| 8 | `hotfix` | primary | Emergency bypass for production | deepseek-v4-flash |
+| 9 | `executor-tdd` | subagent | Writes ONLY failing tests (red phase) | claude-sonnet-4-6 |
+| 10 | `executor` | subagent | Implements code (with or without pre-existing tests) | claude-sonnet-4-6 |
+| 11 | `tester` | subagent | Full suite execution, 100% pass gate | glm-5.1 |
+| 12 | `reviewer` | subagent | Code review, security, marks READY_TO_COMMIT | deepseek-v4-pro |
+| 13 | `committer` | primary | Commit, push, PR — **requires explicit user approval** | minimax-m2.7 |
 
-There are two ways to start the workflow:
+**All 13 agents have `task` tool access** for spawning subagents to parallelize independent work.
 
-**Option A — Via GitHub issue (recommended for team visibility):**
-```
-@issue-crafter          # create a structured GitHub issue
-@orchestrator #<num>    # start the workflow from the issue
-```
+**12/13 agents have `figma_*` and `firecrawl_*` MCP access.** Only `committer` lacks them (purely operational). Every planning, discovery, implementation, design, and review agent can access Figma designs and web research.
 
-**Option B — Via plain text prompt (fast, no GitHub issue needed):**
-```
-@orchestrator add JWT authentication to the API
-```
-The orchestrator detects the input type automatically.
-
----
-
-### Standard Flow
-
-```
-USER
- │
- ├── [Option A] @issue-crafter
- │     Discusses requirements conversationally
- │     Proposes technical approaches
- │     Drafts issue in standard format
- │     Creates GitHub issue with labels + @me assignee
- │     └── Outputs: GitHub issue URL + issue number
- │
- ├── @orchestrator #<num>  OR  @orchestrator <plain text prompt>
- │     Reads PROJECT_CONTEXT.md
- │
- │     [If issue number] Uses issue-reader skill to parse GitHub issue
- │     [If plain prompt] Asks 4 clarifying questions in one message, waits for response
- │
- │     [Technical Discussion — skipped for hotfix/docs/chore/test]
- │     Asks what the user has in mind for the approach
- │     Evaluates user's idea against architecture — validates, challenges, or refines
- │     If user has no opinion: decides autonomously with justification
- │
- │     Creates agents/tasks/<id>.md (SINGLE FILE with spec + plan + tasks + evidence)
- │     [Gate G1]
- │     └── Delegates directly to executor
- │
- ├── @executor (called by orchestrator via task())
- │     Reads agents/tasks/<id>.md + PROJECT_CONTEXT.md
- │     Implements each task from the ### Tasks section
- │     Uses test-generator skill after each implementation
- │     Runs security-checker skill on changed files
- │     Marks checkboxes as complete in task file
- │     [Gate G3]
- │     └── Hands off to @tester
- │
- ├── @tester (called by executor via task())
- │     Reads PROJECT_CONTEXT.md for test commands and thresholds
- │     Runs full test suite (unit + integration + E2E)
- │     Uses coverage-reporter skill (threshold: 80%)
- │     Uses test-logger skill → agents/logs/
- │     Updates Evidence section in task file
- │     [Gate G4]
- │     ├── PASS → @reviewer
- │     └── FAIL → back to @executor
- │
- ├── @reviewer (called by tester via task())
- │     Reads all changed files vs main
- │     Uses quick-review skill (code quality, architecture, performance)
- │     Runs security-checker skill (final pass)
- │     Verifies test logs exist and pass
- │     Uses lessons-writer skill for patterns discovered
- │     [Gate G5]
- │     ├── APPROVED → marks task as READY_TO_COMMIT, notifies user, STOPS
- │     └── CHANGES REQUESTED → back to @executor
- │
- └── @committer agents/tasks/<id>.md   (MANUAL — user-triggered ONLY)
-       Verifies task status = READY_TO_COMMIT
-       Uses commit-changes skill (conventional commit format)
-       Uses push-changes skill (creates feature branch, pushes)
-       Uses create-pr skill (links issue, attaches test evidence)
-       └── Outputs: PR URL
-```
-
-### Visual Diagram
-
-```
-  [Option A]                        [Option B]
-@issue-crafter                  plain text prompt
-      │                                 │
-      │ GitHub Issue #<num>             │
-      └──────────────┬──────────────────┘
-                     │
-          ┌──────────▼──────────┐
-          │  CODEBASE RESEARCH  │
-          │  grep / glob / read │
-          └──────────┬──────────┘
-                     │
-                     ▼
-         ┌───────────────────────┐
-         │      ORCHESTRATOR     │
-         │  Plans EVERYTHING     │
-         │  (no separate planners)│
-         │  Creates single file: │
-         │  agents/tasks/<id>.md │
-         │  [Gate G1]            │
-         └──────────┬────────────┘
-                    │
-                    ▼
-         ┌───────────────────────┐
-         │       EXECUTOR        │
-         │  Implements all tasks │
-         │  test-generator       │
-         │  security-checker     │
-         │  [Gate G3]            │
-         └──────────┬────────────┘
-                    │
-                    ▼
-         ┌───────────────────────┐
-         │        TESTER         │
-         │  test-runner          │
-         │  coverage-reporter    │
-         │  test-logger          │
-         │  [Gate G4]            │
-         └──────────┬────────────┘
-               Pass │ Fail
-                    │   └──→ EXECUTOR (fix loop)
-                    ▼
-         ┌───────────────────────┐
-         │       REVIEWER        │
-         │  quick-review         │
-         │  security-checker     │
-         │  lessons-writer       │
-         │  [Gate G5]            │
-         └──────────┬────────────┘
-            Approved │ Changes
-                     │   └──→ EXECUTOR (revision loop)
-                     ▼
-         ┌───────────────────────┐
-         │  READY_TO_COMMIT      │
-         │  → notify user        │
-         │  → STOP (no auto-commit)│
-         └──────────┬────────────┘
-                    │ USER: @committer
-                    ▼
-         ┌───────────────────────┐
-         │       COMMITTER       │
-         │  commit-changes       │
-         │  push-changes         │
-         │  create-pr            │
-         │  pr-description       │
-         └───────────────────────┘
-                    │
-                    ▼
-         GitHub Pull Request (with test evidence)
-```
+**All 12 agents read the ENTIRE `PROJECT_CONTEXT.md` before any action.** They trust it as the single source of truth — architecture, data model, dev commands, conventions, testing strategy, auth rules, and lessons learned. Source code is only read directly when the context lacks implementation-specific detail.
 
 ---
 
 ## Quick Start
 
-### Step 0: Project Setup (First Time Only)
-
-**Initialize your PROJECT_CONTEXT.md:**
+### Step 0: Project Setup
 
 ```
-@project-setup
+@project-setup            # first run — creates PROJECT_CONTEXT.md
+@project-setup            # any time after — fills gaps or updates sections
 ```
 
-The agent analyzes your codebase, detects the tech stack from config files (package.json, go.mod, requirements.txt, etc.), and guides you through an interactive conversation to populate `PROJECT_CONTEXT.MD` — the single source of truth that all other agents read before acting.
+Analyzes codebase, detects tech stack, guides architecture decisions, creates or updates `PROJECT_CONTEXT.md`. **Re-invocable** — run any time to add missing information.
 
-**Quick mode (auto-fill with sensible defaults):**
+**Quick mode:**
 ```
 @project-setup --quick
 ```
 
-**What it detects automatically:**
-- Frontend: Next.js, React, Vue, Angular, Svelte, Vite, TailwindCSS, etc.
-- Backend: Go (Gin/Echo/Chi), Python (FastAPI/Django), Node.js (Express), etc.
-- Database: PostgreSQL, MySQL, MongoDB, Redis, etc.
-- Testing: Vitest, Jest, Playwright, Cypress, pytest, go test
-- CI/CD: GitHub Actions, GitLab CI, Jenkins
-- Build commands: from package.json, Makefile, docker-compose
-
----
-
-### Option A: Full issue-tracked flow
-
-**1. Create and craft an issue**
+### Option A: Full Product-to-PR flow
 
 ```
-@issue-crafter
-```
+@product-manager              # discuss scope, UX, business rules
+@issue-crafter                # create standardized GitHub issue
+@orchestrator-tdd #<number>   # TDD pipeline (tests first)
+@orchestrator-nontdd #<num>   # OR standard pipeline
 
-**2. Start the automated workflow**
-
-```
-@orchestrator #<issue-number>
-```
-
-The orchestrator parses the issue, discusses approach, creates a unified task file, and delegates to executor. The flow continues automatically through executor → tester → reviewer.
-
-**3. Commit and open the PR**
-
-When the reviewer marks the task as `READY_TO_COMMIT`:
-
-```
+# Pipeline runs automatically: executor → tester → reviewer
+# When reviewer marks READY_TO_COMMIT:
 @committer agents/tasks/<id>.md
 ```
 
----
-
-### Option B: Prompt-only flow (no GitHub issue)
+### Option B: Prompt-only (no GitHub issue)
 
 ```
-@orchestrator add password reset flow to the auth module
+@orchestrator-tdd add JWT authentication to the API
+@orchestrator-nontdd add password reset flow
+@plan-maker refactor the payment module   # plan only, no execution
 ```
 
-The orchestrator asks 4 clarifying questions, creates a unified task file, and continues through the full workflow.
+### Option C: Hotfix (production emergency)
 
----
-
-## Agents
-
-### project-setup
-
-**Purpose:** Entry point for new projects. Analyzes the codebase, detects the tech stack, discusses architecture, creates `PROJECT_CONTEXT.MD`.
-
-**How to invoke:**
-```
-@project-setup
-```
-
----
-
-### issue-crafter
-
-**Purpose:** Conducts a conversation to gather requirements, proposes technical approaches, creates a GitHub issue in the standard format.
-
-**How to invoke:**
-```
-@issue-crafter
-```
-
----
-
-### orchestrator
-
-**Purpose:** Staff engineer coordinator AND planner. Does not write code. Plans ALL implementation details and delegates to executor.
-
-**How to invoke:**
-```
-@orchestrator #<issue-number>           # issue-based
-@orchestrator <plain text description>  # prompt-based
-```
-
-**Key behavior:**
-- NEVER writes code — only plans and delegates
-- Creates a single unified task file: `agents/tasks/<id>.md`
-- Delegates to executor via `task()` with appropriate category and skills
-
----
-
-### executor
-
-**Purpose:** Staff engineer implementer. Works from the unified task file.
-
-**How to invoke:** Called automatically by orchestrator via `task()`
-
-**Key behavior:**
-- Reads `agents/tasks/<id>.md` for all tasks
-- Marks checkboxes as complete in the task file
-- Mandatory test generation and security checks
-- Hands off to tester when done
-
----
-
-### tester
-
-**Purpose:** Executes the full test suite.
-
-**How to invoke:** Called automatically by executor via `task()`
-
-**Key behavior:**
-- Runs all tests, generates coverage reports
-- Updates Evidence section in task file
-- PASS → reviewer | FAIL → back to executor
-
----
-
-### reviewer
-
-**Purpose:** Senior code review. Marks task as `READY_TO_COMMIT` and STOPS. Does NOT auto-commit.
-
-**How to invoke:** Called automatically by tester via `task()`
-
-**Key behavior:**
-- Reviews code, runs security scan
-- APPROVED → marks READY_TO_COMMIT, notifies user, **STOPS**
-- CHANGES → returns to executor
-
----
-
-### committer
-
-**Purpose:** Creates commit, pushes branch, opens PR. **Manual trigger only.**
-
-**How to invoke:** (user-triggered)
-```
-@committer agents/tasks/<id>.md
-```
-
----
-
-### hotfix
-
-**Purpose:** Emergency bypass for critical production issues.
-
-**How to invoke:**
 ```
 @hotfix #<issue-number>
 ```
 
 ---
+
+## Solo Agents (Foundation & Operations)
+
+These agents operate independently and **STOP** after completing their task. They do NOT trigger downstream pipelines.
+
+### project-setup
+
+**Role:** Arquiteto. Analyzes the codebase, detects the tech stack, defines architecture patterns and data models, creates and maintains the foundational `PROJECT_CONTEXT.md`. **Re-invocable** — run any time to fill gaps or update context.
+
+**Invoke:** `@project-setup` (first run or any subsequent update)
+
+**Two modes:**
+- **Mode A (First Run):** No PROJECT_CONTEXT.md exists → full interactive setup, detects stack, asks all questions, creates the file from scratch.
+- **Mode B (Update Run):** File exists → analyzes which sections are filled vs missing → shows gap report → user picks which sections to update → only asks about those gaps.
+
+**Key rules:**
+- Reads all config files in parallel via `task()` subagents
+- In update mode, never overwrites existing data silently — shows diff before writing
+- One question at a time — never overwhelms the user
+- Explicit user approval required before writing
+- Uses the standard 10-section template that all other agents depend on
+
+---
+
+### product-manager
+
+**Role:** Product & UX discovery. Discusses ideas, scope, and business rules with the user BEFORE any code is written. Uses real product management frameworks to refine WHAT needs to be built.
+
+**Invoke:** `@product-manager`
+
+**Product Management Toolkit:**
+- **Personas** — Detailed user profiles (name, role, goals, frustrations, context)
+- **Jobs to be Done (JTBD)** — What job is the user hiring this feature to do?
+- **User Journey Map** — Step-by-step flow: Trigger → Steps → Outcome → Follow-up
+- **Happy Path & Error States** — Ideal flow first, then edge cases (network fail, empty state, invalid input, permissions)
+- **MoSCoW Prioritization** — Must-have / Should-have / Could-have / Won't-have (v1)
+- **Success Metrics** — North Star, KPIs, OKRs (adoption, retention, conversion, time saved)
+- **Risk Assessment** — Technical, UX, business, adoption risks
+- **Competitive Analysis** — What similar products do well/poorly, differentiation
+
+**Challenge techniques:** Five Whys, kill the feature, invert the assumption, time-box the scope, pre-mortem
+
+**Key rules:**
+- Reads `PROJECT_CONTEXT.md` first — never proposes features that violate the architecture
+- **Gathers context from 4 sources before speaking:** PROJECT_CONTEXT.md, `docs/` folder (briefs, journeys), GitHub Issues (related/blocking), and repo structure (existing modules)
+- Parallelizes all context gathering via `task()` subagents
+- Never writes code or creates GitHub issues
+- **MANDATORY at end of every conversation:** offers to generate a document (Feature Brief or custom format)
+- **MANDATORY at end of every conversation:** offers to generate a document (Project Brief or custom format)
+- Document format adapts to what was discussed — requirements, KPIs, journey maps, vision docs, competitive analysis
+- User can specify the format or let the agent choose the best one
+- One area per message — natural dialogue, not questionnaires
+- Outputs a structured Product Discovery Summary with MoSCoW table, edge cases, risks, and metrics
+
+---
+
+### issue-crafter
+
+**Role:** Creates standardized GitHub issues (REQ + TECH) optimized for the orchestrator agents. Handles both single and multi-item inputs.
+
+**Invoke:** `@issue-crafter`
+
+**Input modes:**
+- **Single item:** "Add password reset" → one conversation → one issue
+- **Multi-item / list:** "1. Login Google, 2. Dashboard, 3. CSV export" → detects 3 items → asks: "Separate issues or grouped?" → drafts all in parallel via `task()` → batch approval → creates sequentially
+
+**Issue format (standard):**
+- Title: `[TYPE] Concise imperative description`
+- Body: User Story (`As a... I want... so that...`), Description, Acceptance Criteria (mandatory, testable), Business Rules, Technical Requirements, Design References, Dependencies, Notes
+- Labels: type + scope + priority
+- Assignee: `@me`
+
+**Key rules:**
+- Reads `PROJECT_CONTEXT.md` first
+- Consumes `product-manager` context and `project-brief` documents when available
+- Parallelizes all context reading and issue drafting via `task()` subagents
+- Never creates issues without explicit user approval
+- Acceptance criteria are mandatory — each must be specific and testable
+
+---
+
+### designer
+
+**Role:** Senior Product Designer. Consumes Feature Briefs and requirements, reads the Figma design system (tokens, variables, components, styles), builds production-grade HTML with design tokens and accessibility, then pushes directly into Figma.
+
+**Invoke:** `@designer docs/feature-brief-*.md` or `@designer "Create a login page with Google OAuth"`
+
+**Flow:** Requirements → Design system analysis → HTML/CSS → Figma insert
+
+**Key rules:**
+- Reads Feature Briefs, PROJECT_CONTEXT.MD §8, and the Figma design system simultaneously via `task()` subagents
+- Extracts ALL design tokens from Figma (colors, spacing, typography, radii, shadows) before designing
+- Reuses existing Figma components — never invents new tokens unless explicitly asked
+- Builds standalone HTML/CSS only — no React/Vue/application code
+- Every screen MUST be published to Figma via `html-to-figma` skill or `figma_generate_figma_design`
+- All HTML uses semantic HTML5, WCAG AA accessibility, auto-layout (flexbox/grid), and responsive breakpoints
+
+**Skills:** `frontend-design`, `html-to-figma`, `figma-implement-design`
+
+---
+
+### committer
+
+**Role:** Creates commits, pushes branches, and opens Pull Requests. **Manual trigger only.**
+
+**Invoke:** `@committer agents/tasks/<id>.md`
+
+**GOLDEN RULE:** Must ask for **explicit user approval in chat** before executing ANY git command. Presents the plan (branch, commit message, files) and waits for confirmation.
+
+**Skills:** `commit-changes`, `push-changes`, `create-pr`, `pr-description`
+
+---
+
+## Multi Agents (Development Pipeline)
+
+These agents form chains. Each agent in the pipeline handles its own handoff via `task()`.
+
+### plan-maker
+
+**Role:** Standalone planner. Creates a detailed `agents/tasks/<id>.md` and **STOPS**. Does NOT delegate to any executor.
+
+**Invoke:** `@plan-maker #N` or `@plan-maker <prompt>`
+
+**When to use:** When you want to review and discuss the plan BEFORE choosing TDD vs standard execution.
+
+**Skills:** `issue-reader`, `todo-manager`
+
+---
+
+### orchestrator-tdd
+
+**Role:** Planner + TDD pipeline initiator. Creates `agents/tasks/<id>.md` and delegates to `executor-tdd`.
+
+**Invoke:** `@orchestrator-tdd #N` or `@orchestrator-tdd <prompt>`
+
+**Key rules:**
+- Reads `PROJECT_CONTEXT.md` first
+- Discusses technical approach with user (skipped for hotfix/docs/chore/test)
+- Delegates via `task()` to `executor-tdd` (NOT `executor`)
+- Pipeline continues autonomously: `executor-tdd` → `executor` → `tester` → `reviewer`
+
+**Skills:** `issue-reader`, `todo-manager`
+
+---
+
+### orchestrator-nontdd
+
+**Role:** Planner + standard pipeline initiator. Creates `agents/tasks/<id>.md` and delegates to `executor`.
+
+**Invoke:** `@orchestrator-nontdd #N` or `@orchestrator-nontdd <prompt>`
+
+**Key rules:**
+- Same planning workflow as `orchestrator-tdd`
+- Delegates via `task()` to `executor` (implementation + tests together)
+- Pipeline continues autonomously: `executor` → `tester` → `reviewer`
+
+**Skills:** `issue-reader`, `todo-manager`
+
+---
+
+### hotfix
+
+**Role:** Emergency bypass for critical production issues.
+
+**Invoke:** `@hotfix #<issue-number>`
+
+**Key rules:**
+- Creates minimal `agents/tasks/<id>.md` with hotfix template
+- Delegates to `executor` with 15-minute investigation time-box
+- Abbreviated quality gates (regression test required, full coverage deferred)
+- Monitors post-deployment, creates follow-up issues for root cause analysis
+
+**Skills:** `hotfix-mode`
+
+---
+
+### executor-tdd
+
+**Role:** TDD test writer (Red Phase). Writes ONLY failing tests — never implementation code.
+
+**Invoked by:** `orchestrator-tdd` via `task()`
+
+**Key rules:**
+- Reads `PROJECT_CONTEXT.md` to infer the correct test framework (stack-agnostic)
+- Tests MUST fail initially — validates the test is meaningful
+- Uses mocks, stubs, and interfaces for dependencies that don't exist yet
+- Parallelizes test writing across modules via `task()` subagents
+- After all tests are written, delegates to `executor` via `task()` with clear prompt: "Implement code to pass these failing tests"
+
+**Skills:** `test-generator`
+
+---
+
+### executor
+
+**Role:** Staff engineer implementer. Works in two modes depending on context.
+
+**Invoked by:** `orchestrator-nontdd`, `orchestrator-tdd` (via `executor-tdd`), `hotfix`, `tester` (on failure), `reviewer` (on changes requested)
+
+**Execution Modes:**
+
+| Mode | Trigger | Behavior |
+|------|---------|----------|
+| **A: TDD Green Phase** | Called by `executor-tdd` | Tests already exist and are FAILING. Implement production code to pass ALL tests. Do NOT modify existing tests. Add tests only for untested edge cases. |
+| **B: Standard** | Called by `orchestrator-nontdd` or `hotfix` | No pre-existing tests. Implement code AND generate tests together. |
+
+**Key rules:**
+- Reads `agents/tasks/<id>.md` + `PROJECT_CONTEXT.md`
+- Parallelizes implementation across independent modules via `task()` subagents
+- Mandatory `security-checker` on all changed files
+- After completion: delegate to `tester` via `task()`
+
+**Skills:** `senior-engineer-executor`, `test-generator`, `security-checker`, `frontend-design`, `figma-implement-design`, `db-migrator`
+
+---
+
+### tester
+
+**Role:** Executes the full test suite. **100% pass requirement** — zero failures tolerated.
+
+**Invoked by:** `executor` via `task()`
+
+**Key rules:**
+- Reads `PROJECT_CONTEXT.md` for test commands (stack-agnostic)
+- Parallelizes test execution via `task()` subagents (unit + integration in parallel)
+- **Gate G4:** 100% tests pass + coverage >= 80%
+- PASS → delegate to `reviewer` via `task()`
+- FAIL → return to `executor` via `task()` with detailed failure log
+
+**Skills:** `test-runner`, `test-logger`, `coverage-reporter`
+
+---
+
+### reviewer
+
+**Role:** Senior code review, final security scan, marks `READY_TO_COMMIT` and **STOPS**. Does NOT auto-commit.
+
+**Invoked by:** `tester` via `task()`
+
+**Key rules:**
+- Reads `PROJECT_CONTEXT.md` to enforce architecture and conventions
+- Parallelizes review operations: `quick-review` + `security-checker` in parallel subagents
+- Verifies test evidence exists in the task file
+- APPROVED → mark `READY_TO_COMMIT`, notify user, **STOP**
+- CHANGES → return to `executor` via `task()` with specific issues
+
+**Skills:** `quick-review`, `security-checker`, `lessons-writer`
 
 ---
 
@@ -372,15 +483,15 @@ The orchestrator asks 4 clarifying questions, creates a unified task file, and c
 
 | Gate | Owner | Requirements |
 |------|-------|-------------|
-| **G1** | Orchestrator | Task file exists, problem clear, criteria defined, tasks listed |
-| **G3** | Executor | All checkboxes `[x]`, tests created, security passed |
-| **G4** | Tester | All tests pass, coverage >= 80%, logs saved, evidence updated |
-| **G5** | Reviewer | Review complete, security passed, no HIGH issues |
+| **G1** | plan-maker / orchestrator-tdd / orchestrator-nontdd | Task file exists, problem clear, criteria defined, tasks listed |
+| **G3** | executor | All checkboxes `[x]`, tests created/verified, security passed |
+| **G4** | tester | **100% tests pass** (zero failures) + coverage >= 80% + logs saved |
+| **G5** | reviewer | Review complete, security passed, no HIGH issues |
 
-**Status lifecycle:**
-```
-PLANNING → IN_PROGRESS → TESTING → REVIEW → READY_TO_COMMIT → DONE
-```
+**Hotfix gates (abbreviated):**
+- G3: Fix + regression test + abbreviated security
+- G4: Affected tests pass + regression test passes
+- G5: Quick security scan + regression test verified
 
 ---
 
@@ -395,12 +506,31 @@ PLANNING → IN_PROGRESS → TESTING → REVIEW → READY_TO_COMMIT → DONE
 ### Issue Body Format
 
 ```markdown
-## Problem Statement
+## User Story
+As a <role>, I want <feature> so that <benefit>
+
+## Description
+<detailed description — what, why, scope, context>
+
 ## Acceptance Criteria
+- [ ] <specific, testable, measurable criterion>
+- [ ] <specific, testable, measurable criterion>
+
+## Business Rules
+- <domain logic, validations, workflow constraints — or N/A>
+
 ## Technical Requirements
+<constraints, architectural rules from PROJECT_CONTEXT.md>
+
 ## Design References
+<Figma links, mockups — or N/A>
+
 ## Dependencies
+- Related to: #<num> (if any)
+- Blocked by: #<num> (if any)
+
 ## Notes
+<edge cases, non-functional requirements, security considerations>
 ```
 
 ### Labels
@@ -428,31 +558,35 @@ PLANNING → IN_PROGRESS → TESTING → REVIEW → READY_TO_COMMIT → DONE
 
 | Skill | Used By | What It Does |
 |-------|---------|-------------|
-| `issue-reader` | orchestrator | Parses GitHub issues |
-| `todo-manager` | All agents | Task tracking via unified task file |
-| `lessons-writer` | executor, reviewer | Appends learnings to PROJECT_CONTEXT.md |
-| `test-generator` | executor | Generates tests |
-| `test-runner` | tester | Executes test suite |
+| `feature-brief` | product-manager | Generates structured Feature Brief docs at `docs/feature-brief-*.md` (User Story, MoSCoW, rules, edge cases, metrics) |
+| `project-brief` | product-manager | Generates structured Project Brief docs at `docs/project-brief-*.md` (vision, stack, architecture) |
+| `issue-reader` | plan-maker, orchestrator-tdd, orchestrator-nontdd | Parses GitHub issues into structured intake |
+| `todo-manager` | plan-maker, orchestrator-tdd, orchestrator-nontdd | Task tracking via unified task file |
+| `test-generator` | executor-tdd, executor | Generates tests (supports TDD-first and standard modes) |
+| `test-runner` | tester | Executes test suite, enforces 100% pass |
 | `test-logger` | tester | Saves results to `agents/logs/` |
 | `coverage-reporter` | tester | Generates coverage reports |
-| `security-checker` | executor, reviewer | OWASP checks |
-| `hotfix-mode` | hotfix agent | Expedited fix workflow, skips planning |
+| `security-checker` | executor, reviewer | OWASP security checks |
+| `senior-engineer-executor` | executor | Implementation workflow (dual mode: TDD green phase + standard) |
+| `hotfix-mode` | hotfix | Expedited fix workflow, bypasses full planning |
 | `figma-implement-design` | executor | Translates Figma designs into production code |
-| `html-to-figma` | executor | Builds HTML screens with market-standard design and inserts into Figma |
+| `html-to-figma` | executor | Builds HTML screens with market-standard design, inserts into Figma |
+| `frontend-design` | executor | Design system tokens, accessibility, aesthetics |
+| `db-migrator` | executor | Database migration planning |
+| `quick-review` | reviewer | Structured code review |
+| `code-reviewer` | reviewer | Full code review workflow |
+| `lessons-writer` | executor, reviewer | Appends learnings to PROJECT_CONTEXT.md |
 | `commit-changes` | committer | Creates conventional commit |
 | `push-changes` | committer | Creates branch, pushes |
 | `create-pr` | committer | Opens PR with evidence |
 | `pr-description` | committer | Formats PR body |
-| `frontend-design` | executor | Design direction, accessibility |
-| `db-migrator` | executor | Database migration planning |
-| `quick-review` | reviewer | Structured code review |
 
 ---
 
 ## File Structure
 
 ```
-.env.example          # Template for environment variables (copy to .env)
+.env.example
 agents/
 ├── tasks/
 │   └── <id>.md                 # UNIFIED task file (spec + plan + todos + evidence)
@@ -460,36 +594,91 @@ agents/
     ├── test-run-<id>-<ts>.md   # Test execution results
     ├── coverage-<id>-<ts>.md   # Coverage report
     └── security-<id>-<ts>.md   # Security scan report
+docs/
+├── feature-brief-<name>.md     # Feature-level briefs (scope, rules, edge cases, MoSCoW)
+├── project-brief-<name>.md     # Project-level briefs (vision, stack, architecture)
+├── metrics-<name>.md           # KPI / metrics sheets
+├── journey-<name>.md           # User journey maps
+├── vision-<name>.md            # Product vision documents
+└── competitive-<name>.md       # Competitive landscape docs
+.opencode/
+├── opencode.json               # MCP configuration
+├── agents/
+│   ├── project-setup.md
+│   ├── product-manager.md
+│   ├── issue-crafter.md
+│   ├── plan-maker.md
+│   ├── orchestrator-tdd.md
+│   ├── orchestrator-nontdd.md
+│   ├── hotfix.md
+│   ├── executor-tdd.md
+│   ├── executor.md
+│   ├── tester.md
+│   ├── reviewer.md
+│   └── committer.md
+└── skills/
+    ├── project-brief/
+    ├── issue-reader/
+    ├── todo-manager/
+    ├── test-generator/
+    ├── test-runner/
+    ├── test-logger/
+    ├── coverage-reporter/
+    ├── security-checker/
+    ├── senior-engineer-executor/
+    ├── hotfix-mode/
+    ├── figma-implement-design/
+    ├── html-to-figma/
+    ├── frontend-design/
+    ├── db-migrator/
+    ├── quick-review/
+    ├── code-reviewer/
+    ├── lessons-writer/
+    ├── commit-changes/
+    ├── push-changes/
+    ├── create-pr/
+    └── pr-description/
 ```
 
 **Identifier convention:**
 
 | Trigger | `<id>` | Example |
 |---------|--------|---------|
-| `@orchestrator #42` | `issue-42` | `agents/tasks/issue-42.md` |
-| `@orchestrator <prompt>` | `task-<slug>` | `agents/tasks/task-add-jwt-auth.md` |
+| `@orchestrator-* #42` | `issue-42` | `agents/tasks/issue-42.md` |
+| `@orchestrator-* <prompt>` | `task-<slug>` | `agents/tasks/task-add-jwt-auth.md` |
+
+---
+
+## Parallelization Model
+
+**Every agent in this template is explicitly instructed to parallelize independent work via `task()` subagents.**
+
+| Agent | Parallelization Strategy |
+|-------|-------------------------|
+| `project-setup` | Read config files for frontend, backend, infra simultaneously |
+| `product-manager` | Research competitors, read docs, analyze market data in parallel |
+| `issue-crafter` | Read PROJECT_CONTEXT.md, project briefs, related issues in parallel |
+| `plan-maker` | Spawn subagents to search different codebase patterns simultaneously |
+| `orchestrator-tdd` | Parallel subagents for broad codebase investigation |
+| `orchestrator-nontdd` | Same parallel investigation strategy |
+| `executor-tdd` | Write tests for different modules in parallel subagents |
+| `executor` | Implement independent modules + run security checks in parallel |
+| `tester` | Run unit tests and integration tests simultaneously in separate subagents |
+| `reviewer` | Run code review and security scan in parallel subagents |
+| `hotfix` | Investigate root cause and check deployments in parallel |
+| `committer` | Gather context from git, task file, and logs in parallel |
+
+This is NOT optional. Each agent's prompt contains explicit `PARALLELIZATION MANDATE` or `PARALLELIZE EVERYTHING` instructions in their HARD RULES section.
 
 ---
 
 ## Configuration
 
-### Quick Setup
-
-```
-@project-setup
-```
-
 ### Environment Variables
-
-This project uses environment variables to keep sensitive credentials out of the repository.
-
-**1. Copy the example file:**
 
 ```bash
 cp .env.example .env
 ```
-
-**2. Fill in your credentials in `.env`:**
 
 | Variable | Description | How to get it |
 |----------|-------------|---------------|
@@ -497,11 +686,9 @@ cp .env.example .env
 | `FIGMA_CLIENT_SECRET` | Figma OAuth client secret | Same as above |
 | `FIRECRAWL_API_KEY` | Firecrawl MCP API key | [Firecrawl](https://www.firecrawl.dev/) |
 
-> **Note:** The `.env` file is already in `.gitignore` and will not be committed. Never commit real credentials.
-
 ### opencode.json
 
-The MCP configuration in `.opencode/opencode.json` references environment variables instead of hardcoded secrets:
+The MCP configuration in `.opencode/opencode.json` references environment variables:
 
 ```json
 {
@@ -536,16 +723,6 @@ gh auth status
 
 ---
 
-## Hotfix Flow
-
-```
-@hotfix #<issue-number>
-```
-
-**Abbreviated flow:** executor (minimal fix + regression test) → tester (affected tests only) → user triggers `@committer`
-
----
-
 ## Customization
 
 ### Add a New Agent
@@ -555,14 +732,26 @@ Create `.opencode/agents/my-agent.md` with frontmatter:
 ```markdown
 ---
 description: What this agent does.
-mode: subagent
+mode: primary | subagent
 model: anthropic/claude-sonnet-4-6
+tools:
+  task: true
+  read: true
+  glob: true
+  grep: true
 ---
 ```
 
 ### Add a New Skill
 
-Create `.opencode/skills/my-skill/SKILL.md`
+Create `.opencode/skills/my-skill/SKILL.md` with frontmatter:
+
+```markdown
+---
+name: my-skill
+description: What this skill does.
+---
+```
 
 ### Change an Agent's Model
 
@@ -572,18 +761,30 @@ Edit the `model:` field in the agent's frontmatter.
 
 ## Troubleshooting
 
-### Orchestrator is implementing instead of delegating
+### Agent not parallelizing
 
-The orchestrator MUST NOT write code. Check that it only uses `read`, `glob`, `grep`, and `task` tools.
+All 12 agents have explicit `PARALLELIZATION MANDATE` instructions. If an agent runs operations sequentially, it may be because the operations have dependencies that prevent parallelization. Independent operations should always be parallelized via `task()`.
 
 ### Tests failing at Gate G4
 
-Check `agents/logs/test-run-<id>-*.md` for details. The tester returns to executor automatically.
+Check `agents/logs/test-run-<id>-*.md` for details. The tester returns to executor automatically. **100% of tests must pass** — even a single failure blocks the gate.
+
+### Coverage below threshold
+
+Threshold is 80% for new code. The tester returns to executor with the coverage report. Add tests for uncovered paths.
 
 ### Task not reaching READY_TO_COMMIT
 
-Check `agents/tasks/<id>.md` — verify all checkboxes are `[x]` and Evidence section is filled.
+Check `agents/tasks/<id>.md` — verify all checkboxes are `[x]` and Evidence section is filled. The task must pass through `executor → tester → reviewer` in order.
 
 ### PR creation fails
 
-Run `gh auth status`. Confirm task status is `READY_TO_COMMIT` before `@committer`.
+- Run `gh auth status` to verify GitHub CLI authentication
+- Confirm task status is `READY_TO_COMMIT` in `agents/tasks/<id>.md`
+- The committer will ask for explicit approval — you must confirm in chat
+
+### Agent confusion about TDD vs Standard mode
+
+- `executor-tdd` writes ONLY tests (red phase)
+- `executor` checks if tests exist → Mode A (green phase, don't modify tests) or Mode B (standard, implement + generate tests)
+- If the wrong agent is triggered, restart with the correct orchestrator

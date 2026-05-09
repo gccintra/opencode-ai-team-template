@@ -92,7 +92,7 @@ Extract from test output:
 
 **Summary:**
 - Total: 45 tests
-- Passed: 45
+- Passed: 45 (100%)
 - Failed: 0
 - Duration: 12.5s
 
@@ -102,7 +102,7 @@ Extract from test output:
 - Functions: 90.1%
 - Lines: 84.8%
 
-**Status:** Ready for code review
+**Status:** All tests pass (100%). Coverage >= 80%. Ready for code review.
 ```
 
 #### Tests Failed
@@ -132,6 +132,10 @@ Extract from test output:
 
 ### Step 7: Handoff Decision
 
+**CRITICAL — 100% Pass Requirement:**
+- **ALL tests must pass.** Zero failures tolerated. Any failed test = gate blocked → return to `@executor`.
+- Coverage threshold: 80% for new code (or as specified in PROJECT_CONTEXT.md).
+
 **If ALL tests pass AND coverage >= threshold:**
 → Handoff to `@reviewer`
 
@@ -141,14 +145,9 @@ Extract from test output:
 **If coverage below threshold:**
 → Return to `@executor` with coverage report
 
-### Coverage Threshold
-Default: 80% (or as specified in PROJECT_CONTEXT.md)
-
-Check against threshold:
-```bash
-# Extract coverage from report
-# If below threshold, fail the gate
-```
+### Pass Threshold
+**100% of tests must pass.** This is the highest priority gate check.
+Coverage threshold: Default 80% (or as specified in PROJECT_CONTEXT.md).
 
 ### Test Isolation
 Before running tests, use **Test DB Reset** from `PROJECT_CONTEXT.md` if applicable.

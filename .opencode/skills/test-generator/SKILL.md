@@ -11,6 +11,7 @@ Automatically generate tests for implemented code following project testing stan
 - After fixing a bug (regression test)
 - When executor completes a task
 - When coverage is below threshold
+- **TDD-First (executor-tdd):** When writing tests BEFORE implementation — tests must be designed to FAIL initially (red phase). Use mocks/stubs/interfaces for dependencies that don't exist yet.
 
 ### Prerequisites
 **CRITICAL**: Read `PROJECT_CONTEXT.md` to understand:
@@ -205,3 +206,11 @@ Ready for: @tester to execute
 - Mock external services (APIs, databases in unit tests)
 - Include both positive and negative test cases
 - Test the public API, not internal implementation
+
+### TDD-First Mode (for executor-tdd)
+- Write tests BEFORE any implementation exists
+- Tests MUST fail initially (red phase) — validates the test is meaningful
+- Use mocks/stubs/interfaces for dependencies that haven't been built yet
+- Import from future source paths (e.g., `import { newFunction } from '../src/newModule'`)
+- Tests serve as the executable specification for executor to implement against
+- Stack-agnostic: always read PROJECT_CONTEXT.md for the correct test framework
