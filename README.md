@@ -1,6 +1,6 @@
 # OpenCode AI Team Template
 
-A production-ready template for orchestrating a team of 12 specialized AI agents that collaborate to deliver features end-to-end — from product discovery to Pull Request — with five distinct workflows, mandatory parallelization, automated testing, security checks, and code review.
+A production-ready template for orchestrating a team of 13 specialized AI agents that collaborate to deliver features end-to-end — from product discovery to Pull Request — with six distinct workflows, mandatory parallelization, automated testing, security checks, and code review.
 
 ---
 
@@ -38,7 +38,7 @@ A production-ready template for orchestrating a team of 12 specialized AI agents
 
 ## Architecture & Workflows
 
-This template provides **5 distinct workflows** covering the full development lifecycle:
+This template provides **6 distinct workflows** covering the full development lifecycle:
 
 ### Flow 1: Product Discovery → Issue (Solo)
 
@@ -66,7 +66,19 @@ This template provides **5 distinct workflows** covering the full development li
 2. `issue-crafter` auto-discovers the doc (even if you forget to pass the path)
 3. If a doc is found, Discovery phase is skipped — no re-discussing what was already decided
 
-### Flow 2: TDD Pipeline (Tests First)
+### Flow 2: Requirements → Design (Solo)
+
+```
+@designer docs/feature-brief-<name>.md   OR   @designer <description>
+       │
+       ├─ Reads brief + PROJECT_CONTEXT.MD §8 + Figma design system
+       ├─ Extracts tokens, variables, components, styles from Figma
+       ├─ Builds standalone HTML/CSS with design tokens and WCAG AA
+       │
+       └─ Pushes to Figma → outputs Figma URL → STOP
+```
+
+### Flow 3: TDD Pipeline (Tests First)
 
 ```
 @orchestrator-tdd #N
@@ -102,7 +114,7 @@ This template provides **5 distinct workflows** covering the full development li
                  └─ fail? ──→ task(executor) [loop]
 ```
 
-### Flow 3: Standard Pipeline (Code + Tests Together)
+### Flow 4: Standard Pipeline (Code + Tests Together)
 
 ```
 @orchestrator-nontdd #N
@@ -122,7 +134,7 @@ This template provides **5 distinct workflows** covering the full development li
        └─ task(tester) → task(reviewer) → [same as TDD flow]
 ```
 
-### Flow 4: Hotfix (Emergency Bypass)
+### Flow 5: Hotfix (Emergency Bypass)
 
 ```
 @hotfix #N
@@ -138,7 +150,7 @@ This template provides **5 distinct workflows** covering the full development li
        └─ task(tester) → task(reviewer) → READY_TO_COMMIT
 ```
 
-### Flow 5: Standalone Planning (No Execution)
+### Flow 6: Standalone Planning (No Execution)
 
 ```
 @plan-maker #N
@@ -181,7 +193,7 @@ PLANNING → IN_PROGRESS → TESTING → REVIEW → READY_TO_COMMIT → DONE
 
 **12/13 agents have `figma_*` and `firecrawl_*` MCP access.** Only `committer` lacks them (purely operational). Every planning, discovery, implementation, design, and review agent can access Figma designs and web research.
 
-**All 12 agents read the ENTIRE `PROJECT_CONTEXT.md` before any action.** They trust it as the single source of truth — architecture, data model, dev commands, conventions, testing strategy, auth rules, and lessons learned. Source code is only read directly when the context lacks implementation-specific detail.
+**All 13 agents read the ENTIRE `PROJECT_CONTEXT.md` before any action.** They trust it as the single source of truth — architecture, data model, dev commands, conventions, testing strategy, auth rules, and lessons learned. Source code is only read directly when the context lacks implementation-specific detail.
 
 ---
 
@@ -332,11 +344,18 @@ These agents operate independently and **STOP** after completing their task. The
 
 ### committer
 
-**Role:** Creates commits, pushes branches, and opens Pull Requests. **Manual trigger only.**
+**Role:** Creates standardized, layer-split commits, pushes branches, and opens Pull Requests. **Manual trigger only.**
 
 **Invoke:** `@committer agents/tasks/<id>.md`
 
-**GOLDEN RULE:** Must ask for **explicit user approval in chat** before executing ANY git command. Presents the plan (branch, commit message, files) and waits for confirmation.
+**GOLDEN RULE — Commit Plan + Approval:**
+1. Analyzes all changed files and classifies them by layer: **Infra/Types**, **Business Logic/Services**, **UI/Interface**, **Tests**
+2. Drafts a **Commit Plan** — one conventional commit per layer with affected changes
+3. Presents the full plan to the user: "Can I proceed with this commit plan?"
+4. **STOP and WAIT** for explicit user approval
+5. After approval: creates each commit sequentially using `git add <specific files>` (never `git add .`), pushes, and opens the PR
+
+**If the task spans only one layer, one commit is acceptable.** Defaults to split commits when changes span 2+ layers.
 
 **Skills:** `commit-changes`, `push-changes`, `create-pr`, `pr-description`
 
@@ -666,7 +685,7 @@ docs/
 | `tester` | Run unit tests and integration tests simultaneously in separate subagents |
 | `reviewer` | Run code review and security scan in parallel subagents |
 | `hotfix` | Investigate root cause and check deployments in parallel |
-| `committer` | Gather context from git, task file, and logs in parallel |
+| `committer` | Gather context from git, task file, and logs in parallel; classify files by layer |
 
 This is NOT optional. Each agent's prompt contains explicit `PARALLELIZATION MANDATE` or `PARALLELIZE EVERYTHING` instructions in their HARD RULES section.
 
@@ -763,7 +782,7 @@ Edit the `model:` field in the agent's frontmatter.
 
 ### Agent not parallelizing
 
-All 12 agents have explicit `PARALLELIZATION MANDATE` instructions. If an agent runs operations sequentially, it may be because the operations have dependencies that prevent parallelization. Independent operations should always be parallelized via `task()`.
+All 13 agents have explicit `PARALLELIZATION MANDATE` instructions. If an agent runs operations sequentially, it may be because the operations have dependencies that prevent parallelization. Independent operations should always be parallelized via `task()`.
 
 ### Tests failing at Gate G4
 
@@ -781,7 +800,7 @@ Check `agents/tasks/<id>.md` — verify all checkboxes are `[x]` and Evidence se
 
 - Run `gh auth status` to verify GitHub CLI authentication
 - Confirm task status is `READY_TO_COMMIT` in `agents/tasks/<id>.md`
-- The committer will ask for explicit approval — you must confirm in chat
+- The committer will present a Commit Plan and ask for approval — you must confirm in chat
 
 ### Agent confusion about TDD vs Standard mode
 

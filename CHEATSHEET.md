@@ -37,6 +37,14 @@ I have an...                               →  Use this agent
 @issue-crafter                    # Single requirement → one issue
 @issue-crafter                    # "1. Login, 2. Dashboard, 3. CSV" → detects list
 @issue-crafter docs/feature-brief-notifications.md   # Create issue FROM a brief
+
+### Design
+
+```bash
+@designer docs/feature-brief-notifications.md          # Brief → design system → HTML → Figma
+@designer docs/feature-brief-notifications.md "add a dark mode toggle"  # Brief + extra context
+@designer "Create a login page with email and Google OAuth"  # Text description → design
+```
 ```
 
 ### Development Pipelines
@@ -61,17 +69,18 @@ I have an...                               →  Use this agent
 ### Commit & PR
 
 ```bash
-@committer agents/tasks/issue-42.md       # Create commit + push + PR
-                                          # WAITS for your explicit approval before git actions
+@committer agents/tasks/issue-42.md       # Analyzes changes → drafts Commit Plan (multiple commits by layer)
+                                           # Presents plan → WAITS for approval → creates commits + push + PR
 ```
 
 ---
 
-## The 5 Flows at a Glance
+## The 6 Flows at a Glance
 
 | Flow | Trigger | Pipeline |
 |------|---------|----------|
 | **Product → Issue** | `@product-manager` → `@issue-crafter` | Discuss → Doc → Issue |
+| **Requirements → Figma** | `@designer` | Brief → Design system → HTML → Figma insert |
 | **TDD Pipeline** | `@orchestrator-tdd` | Plan → `executor-tdd` (tests) → `executor` (code) → `tester` → `reviewer` |
 | **Standard Pipeline** | `@orchestrator-nontdd` | Plan → `executor` (code+tests) → `tester` → `reviewer` |
 | **Hotfix** | `@hotfix #N` | Minimal plan → `executor` → `tester` → `reviewer` |
@@ -79,12 +88,13 @@ I have an...                               →  Use this agent
 
 ---
 
-## Agent Roles (12 agents)
+## Agent Roles (13 agents)
 
 | Agent | Does | Does NOT |
 |-------|------|----------|
 | `project-setup` | Creates/manages PROJECT_CONTEXT.md | Write code, plan features |
 | `product-manager` | Refines WHAT to build (scope, rules, metrics) | Write code, create issues |
+| `designer` | Brief → design system → HTML → Figma | Write app code (React/Vue/etc) |
 | `issue-crafter` | Creates GitHub issues from requirements | Write code, implement |
 | `plan-maker` | Creates `agents/tasks/<id>.md` plan | Execute, delegate to executor |
 | `orchestrator-tdd` | Plan + delegate to executor-tdd | Write code, implement |
@@ -93,7 +103,7 @@ I have an...                               →  Use this agent
 | `executor` | Implement code (green phase or standard) | Delegate to tester before done |
 | `tester` | Run test suite, 100% pass gate | Approve code (that's reviewer) |
 | `reviewer` | Code review + security + READY_TO_COMMIT | Commit, push, create PR |
-| `committer` | Commit + push + PR (manual, asks approval) | Auto-commit without asking |
+| `committer` | Commit Plan by layer + push + PR (manual, asks approval) | Auto-commit without asking |
 | `hotfix` | Emergency production fix flow | Full planning, full coverage |
 
 ---
@@ -122,6 +132,7 @@ After G5 → `READY_TO_COMMIT` → you call `@committer`.
 | `agents/logs/test-run-*.md` | `@tester` | After test execution |
 | `agents/logs/coverage-*.md` | `@tester` | After coverage analysis |
 | `agents/logs/security-*.md` | executor/reviewer | After security scan |
+| Figma HTML files | `@designer` | During design creation (temp, then pushed to Figma) |
 
 ---
 
@@ -132,7 +143,7 @@ After G5 → `READY_TO_COMMIT` → you call `@committer`.
 | 📖 Read `PROJECT_CONTEXT.md` first | Never act without context |
 | 🔀 Parallelize with `task()` | Independent work = simultaneous subagents |
 | 📄 Trust the context | Only read code directly when context is insufficient |
-| 🛑 Never auto-commit | Committer MUST ask explicit user approval |
+| 🛑 Never auto-commit | Committer presents Commit Plan, MUST ask explicit user approval |
 | ✅ 100% tests pass | G4 gate blocks on ANY test failure |
 | 🔒 Explicit approval | project-setup, issue-crafter, committer all require it |
 | 🧠 AI suggests, you decide | Orchestrators/plan-maker never choose tech approach autonomously |
@@ -149,6 +160,11 @@ After G5 → `READY_TO_COMMIT` → you call `@committer`.
 → pick Feature Brief (for features) or Project Brief (for new projects)
 → agent outputs: "@issue-crafter docs/feature-brief-<name>.md"
 → copy-paste that command
+
+# OPTIONAL: See the design before coding
+@designer docs/feature-brief-notifications.md
+→ reads brief + design system → HTML → Figma → outputs Figma URL
+
 @issue-crafter docs/feature-brief-<name>.md
 → agent reads the brief, drafts the issue, asks for approval
 → creates GitHub issue
@@ -158,13 +174,15 @@ After G5 → `READY_TO_COMMIT` → you call `@committer`.
 → pipeline runs automatically: plan → tests → code → tester → reviewer
 → when reviewer says READY_TO_COMMIT:
 @committer agents/tasks/issue-N.md
+→ committer classifies files by layer (Infra → Logic → UI → Tests)
+→ presents Commit Plan (multiple commits) → asks approval → creates commits + PR
 ```
-
 ### "I know exactly what I need"
 ```
 @orchestrator-nontdd "add export CSV to the reports page"
 → plan → code + tests → tester → reviewer → READY_TO_COMMIT
 @committer agents/tasks/task-add-export-csv.md
+→ classifies files → drafts Commit Plan by layer → asks approval → commits + PR
 ```
 
 ### "Just make a plan, I'll review before coding"
@@ -174,6 +192,15 @@ After G5 → `READY_TO_COMMIT` → you call `@committer`.
 → STOP — read the plan, then decide:
    @orchestrator-tdd agents/tasks/<id>.md
    @orchestrator-nontdd agents/tasks/<id>.md
+```
+
+### "I have a brief, I want to see the design"
+```
+@designer docs/feature-brief-notifications.md
+→ reads brief + PROJECT_CONTEXT.MD §8 + Figma design system
+→ extracts tokens, colors, spacing, components
+→ builds HTML with design tokens, auto-layout, WCAG AA
+→ pushes to Figma → outputs Figma URL
 ```
 
 ### "Production is broken"
