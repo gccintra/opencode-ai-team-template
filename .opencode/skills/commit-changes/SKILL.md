@@ -20,7 +20,7 @@ Create well-structured, conventional commits that follow project standards and p
 ### Step 1: Verify Ready State
 ```bash
 # Check spec status
-grep -l "READY_TO_COMMIT" agents/specs/issue-*-spec.md
+grep -l "READY_TO_COMMIT" .opencode/work/specs/issue-*-spec.md
 
 # Verify clean working directory (only expected changes)
 git status
